@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<navigationModel
+  ns = "http://schemas.android.com?import=com.android.tools.idea.editors.navigation.model.*">
+  <locations  
+    class = "java.util.ArrayList">
+    <statePointEntry>
+      <state      
+        class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
+        className = "org.meluskyc.codebriefcase.activity.MainActivity"/>
+      <point      
+        x = "1814"      
+        y = "578"/>
+    </statePointEntry>
+    <statePointEntry>
+      <state      
+        class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
+        className = "org.meluskyc.codebriefcase.activity.SettingsActivity"/>
+      <point      
+        x = "616"      
+        y = "572"/>
+    </statePointEntry>
+    <statePointEntry>
+      <state      
+        class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
+        className = "org.meluskyc.codebriefcase.activity.AddEditActivity"/>
+      <point      
+        x = "2967"      
+        y = "578"/>
+    </statePointEntry>
+    <statePointEntry>
+      <state      
+        class = "com.android.tools.idea.editors.navigation.model.ActivityState"      
+        className = "org.meluskyc.codebriefcase.model.CreateEditActivity"/>
+      <point      
+        x = "548"      
+        y = "148"/>
+    </statePointEntry>
+  </locations>
+</navigationModel>

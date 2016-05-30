@@ -1,0 +1,43 @@
+<md-toolbar layout="row">
+  <div class="md-toolbar-tools">
+    <md-button class="md-icon-button" ng-click="goBack()" aria-label="Back">
+      <md-icon md-svg-icon="assets/images/ic_arrow_back_white.svg"></md-icon>
+    </md-button>
+    <h2 class="title">
+      <span>Add</span>
+    </h2>
+    <span flex></span>
+    <md-button ng-click="submitItem()" class="md-icon-button" aria-label="Done">
+      <md-icon md-svg-icon="assets/images/ic_done_white.svg"></md-icon>
+    </md-button>
+  </div>
+</md-toolbar>
+
+<div layout="column" ng-show="loaded" ng-cloak="" class="md-inline-form">
+  <md-content layout-padding="">
+    <div>
+      <form>
+        <md-input-container class="md-block" flex-gt-sm="" >
+          <label>Short description</label>
+          <input ng-model="item.description">
+        </md-input-container>
+
+        <md-input-container class="md-block" flex-gt-sm="">
+          <label>Tag</label>
+          <md-select class="tag-list" ng-model="item.tag_primary">
+            <md-option ng-repeat="tag in tags" value="{{tag.name}}">
+              {{tag.name}}
+            </md-option>
+          </md-select>
+        </md-input-container>
+
+        <md-input-container class="md-block" flex-gt-sm="" >
+          <label>Secondary tag</label>
+          <input ng-model="item.tag_secondary">
+        </md-input-container>
+
+        <div ui-ace="uiAceConfig" ng-model="item.content"></div>
+      </form>
+    </div>
+  </md-content>
+</div>

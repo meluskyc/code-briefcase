@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="80dp">
+
+    <TextView
+        android:id="@+id/main_text_tag_primary"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:background="@color/gray"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:text="Tag"/>
+
+    <TextView
+        android:id="@+id/main_text_date_updated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
+        android:textAlignment="textEnd"
+        android:layout_toRightOf="@id/main_text_tag_primary"
+        android:text="Date"
+        android:textColor="@color/darkblue"
+        android:textSize="12sp"
+        android:singleLine="true" />
+
+    <TextView
+        android:id="@+id/main_text_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="30dp"
+        android:layout_toRightOf="@id/main_text_tag_primary"
+        android:layout_below="@id/main_text_date_updated"
+        android:text="Description"
+        android:maxLines="2"
+        android:lines="2"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/main_text_tag_secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:layout_toRightOf="@id/main_text_tag_primary"
+        android:layout_below="@id/main_text_description"
+        android:text="Tag Secondary"
+        android:maxLines="1"
+        android:lines="1"
+        android:textSize="12sp"
+        android:ellipsize="end"/>
+
+    <ImageView
+        android:id="@+id/main_image_starred"
+        android:src="@drawable/ic_star_outline_24dp"
+        android:contentDescription="@string/starred"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

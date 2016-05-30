@@ -1,0 +1,105 @@
+@import '../bower_components/angular-material/angular-material';
+@import url('http://fonts.googleapis.com/css?family=Roboto:400,400italic,500,500italic,700,700italic,900,900italic,300italic,300,100italic,100');
+
+/**
+ * App-wide Styles
+ */
+
+.browserupgrade {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+
+body {
+  font-family: 'Roboto';
+}
+
+/* SIDEBAR */
+.app-sidebar {
+  width:     220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+
+.logo {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 16px;
+  margin: 0 auto;
+}
+
+.filters-menu {
+  list-style: none;
+  padding: 0;
+  clear: both;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.filters-menu li {
+  margin: 0;
+  padding: 0;
+  display: block;
+  list-style-position: inside;
+  text-align: center;
+  align-content: center;
+}
+
+.filters-menu span {
+  text-transform: none;
+}
+
+.filters-menu a {
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
+}
+/* END SIDEBAR */
+
+/* LIST */
+
+.list-items {
+  padding: 0 0 0 0;
+}
+
+.list-items button {
+  padding: 0 0 0 0;
+}
+
+.tag-list-text {
+  text-align: center;
+  color: #FFFFFF;
+}
+
+#date {
+  align-self: flex-start;
+  margin: 0;
+  color: darkblue;
+}
+
+.list-date {
+  align-self: flex-start;
+}
+
+#starButton {
+  margin-top: 10px;
+}
+
+/* END LIST */
+
+/* ADD, DETAIL */
+.ace_editor { height: 800px; }
+
+.tag-list {
+  max-width: 400px;
+}
+/* END ADD, DETAIL */
+
+// Component styles are injected through grunt
+// injector
+@import 'shared/fab/fab.scss';
+@import 'shared/sidebar/sidebar.scss';
+// endinjector

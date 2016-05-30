@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Code Briefcase</title>
+  <style>
+    * {
+      font-size: 40px;
+      text-align: center;
+    }
+    .requesting {
+      background: url("/assets/images/connect.png") center 200px no-repeat;
+    }
+  </style>
+</head>
+<body>
+<p>Loading...</p>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>
+  $(document).ready(function(){
+    $("body").addClass("requesting");
+    $("p").html("Accept the connection on your device");
+
+    var timer = $.Deferred();
+    setTimeout(timer.resolve, 5000);
+
+    $.ajax({url: '/connect', dataType: 'json'})
+      .done(function(data) {
+        if (data.result === 'accept') {
+          window.location.href='/';
+        }
+        else {
+          $("p").html("Rejected. Refresh the page to try again.");
+        }
+      })
+      .fail(function() {
+        $("p").html("Unable to connect. Refresh the page to try again.");
+      })
+      .always(function() {
+        $("body").removeClass("requesting");
+      });
+  });
+</script>
+</body>
+</html>
