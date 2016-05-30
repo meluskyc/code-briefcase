@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import org.meluskyc.codebriefcase.R;
 import org.meluskyc.codebriefcase.server.AppServlets;
 import org.meluskyc.codebriefcase.server.AppWebService;
-import org.meluskyc.codebriefcase.utils.AppUtils;
 
 public class WebActivity extends BaseActivity {
 

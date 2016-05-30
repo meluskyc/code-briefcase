@@ -3,7 +3,6 @@ package org.meluskyc.codebriefcase.server;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
