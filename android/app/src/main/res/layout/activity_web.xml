@@ -32,10 +32,23 @@
 
         <TextView
             android:id="@+id/web_text_help"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Open a web browser to: "
+            android:layout_centerInParent="true"
+            />
+
+        <TextView
+            android:id="@+id/web_text_disable_offline"
+            android:textSize="14sp"
+            android:clickable="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/darkblue"
+            android:text="@string/disable_offline_mode"
+            android:visibility="gone"
+            android:onClick="disableOfflineMode"
+            android:layout_below="@id/web_text_help"
             android:layout_centerInParent="true"
             />
 
@@ -44,9 +57,9 @@
             android:textSize="16sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Disconnect"
+            android:text="@string/disconnect"
             android:visibility="invisible"
-            android:layout_below="@id/web_text_help"
+            android:layout_below="@id/web_text_disable_offline"
             android:onClick="disconnect"
             android:layout_centerInParent="true"/>
 

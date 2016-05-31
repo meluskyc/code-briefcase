@@ -46,5 +46,10 @@
     <string name="wants_to_connect">%1$s wants to connect to Code Briefcase</string>
     <string name="accept">Accept</string>
     <string name="reject">Reject</string>
+    <string name="pref_offline_mode_title">Offline mode</string>
+    <string name="pref_offline_mode_key">offline_mode</string>
+    <string name="offline_mode_is_on">Offline mode is enabled</string>
+    <string name="disable_offline_mode">Disable offline mode?</string>
+    <string name="disconnect">Disconnect</string>
 
 </resources>

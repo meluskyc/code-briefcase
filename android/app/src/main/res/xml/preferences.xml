@@ -8,5 +8,9 @@
         android:entryValues="@array/pref_themes_values"
         android:defaultValue="@string/pref_theme_default" />
 
+    <CheckBoxPreference
+        android:key="@string/pref_offline_mode_key"
+        android:title="@string/pref_offline_mode_title"
+        android:defaultValue="false" />
 
 </PreferenceScreen>
