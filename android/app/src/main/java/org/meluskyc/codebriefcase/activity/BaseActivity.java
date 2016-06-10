@@ -1,5 +1,8 @@
 package org.meluskyc.codebriefcase.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
@@ -9,11 +12,24 @@ import android.support.v7.app.AppCompatActivity;
 
 import org.meluskyc.codebriefcase.R;
 import org.meluskyc.codebriefcase.server.AppWebService;
-import org.meluskyc.codebriefcase.server.WiFiReceiver;
 
 public class BaseActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private WiFiReceiver wifiReceiver;
+    private class WifiReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (((WifiManager) context.getSystemService(context.WIFI_SERVICE))
+                    .getConnectionInfo()
+                    .getIpAddress() != 0) {
+                AppWebService.start(context);
+            }
+            else {
+                AppWebService.stop(context);
+            }
+        }
+    }
+
+    private WifiReceiver wifiReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +84,7 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
 
     protected void registerWifiReceiver() {
         if (wifiReceiver == null) {
-            wifiReceiver = new WiFiReceiver();
+            wifiReceiver = new WifiReceiver();
             registerReceiver(wifiReceiver,
                     new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
         }
