@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import org.meluskyc.codebriefcase.R;
 
-public class AppDbHelper extends SQLiteOpenHelper {
+public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "codebriefcase.db";
     private static final int DB_VERSION = 8;
@@ -92,17 +92,17 @@ public class AppDbHelper extends SQLiteOpenHelper {
     private static final String SQL_DROP_TRIGGER_SEARCH_AU = "DROP TRIGGER IF EXISTS search_au;";
     private static final String SQL_DROP_TRIGGER_SEARCH_AI = "DROP TRIGGER IF EXISTS search_ai;";
 
-    private static AppDbHelper dbHelper;
+    private static CodeBriefcaseDatabase dbHelper;
     private Context context;
 
-    private AppDbHelper(Context context) {
+    private CodeBriefcaseDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         this.context = context.getApplicationContext();
     }
 
-    public static synchronized AppDbHelper getInstance(Context context) {
+    public static synchronized CodeBriefcaseDatabase getInstance(Context context) {
         if (dbHelper == null) {
-            dbHelper = new AppDbHelper(context.getApplicationContext());
+            dbHelper = new CodeBriefcaseDatabase(context.getApplicationContext());
         }
         return dbHelper;
     }

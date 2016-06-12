@@ -42,7 +42,7 @@
         </activity>
 
         <provider
-            android:name=".database.AppContentProvider"
+            android:name=".database.CodeBriefcaseProvider"
             android:authorities="org.meluskyc.codebriefcase"
             android:enabled="true"
             android:exported="false" />

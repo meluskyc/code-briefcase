@@ -33,8 +33,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.database.AppContentProvider;
-import org.meluskyc.codebriefcase.database.AppDbHelper;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseProvider;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseDatabase;
 
 
 public class MainActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
@@ -90,9 +90,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     private void setupItemsView() {
         itemsAdapter = new SimpleCursorAdapter(this, R.layout.item_main, null,
-                new String[]{AppDbHelper.ITEM_TAG_PRIMARY, AppDbHelper.ITEM_DESCRIPTION,
-                        AppDbHelper.ITEM_DATE_UPDATED, AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.TAG_COLOR,
-                        AppDbHelper.ITEM_STARRED},
+                new String[]{CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
+                        CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.TAG_COLOR,
+                        CodeBriefcaseDatabase.ITEM_STARRED},
                 new int[] {R.id.main_text_tag_primary, R.id.main_text_description, R.id.main_text_date_updated,
                         R.id.main_text_tag_secondary, SimpleCursorAdapter.NO_SELECTION, R.id.main_image_starred}, 0);
 
@@ -100,16 +100,16 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
                 switch (columnIndex) {
                     case 1:
-                        view.setBackgroundColor(Color.parseColor(cursor.getString(cursor.getColumnIndex(AppDbHelper.TAG_COLOR))));
-                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(AppDbHelper.ITEM_TAG_PRIMARY)));
+                        view.setBackgroundColor(Color.parseColor(cursor.getString(cursor.getColumnIndex(CodeBriefcaseDatabase.TAG_COLOR))));
+                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY)));
                         return true;
                     case 3:
-                        long dateLong = cursor.getLong(cursor.getColumnIndex(AppDbHelper.ITEM_DATE_UPDATED));
+                        long dateLong = cursor.getLong(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_DATE_UPDATED));
                         ((TextView) view).setText(DateUtils.getRelativeTimeSpanString(dateLong,
                                 System.currentTimeMillis(), DateUtils.FORMAT_ABBREV_RELATIVE));
                         return true;
                     case 6:
-                        switch (cursor.getInt(cursor.getColumnIndex(AppDbHelper.ITEM_STARRED))) {
+                        switch (cursor.getInt(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_STARRED))) {
                             case 0:
                                 ((ImageView) view).setImageResource(R.drawable.ic_star_outline_24dp);
                                 view.setTag(0);
@@ -211,28 +211,28 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                     String where = "";
                     if (!TextUtils.isEmpty(filter)) {
                         where = filter.equals("Starred")
-                                ? AppDbHelper.ITEM_STARRED + " = 1"
-                                : AppDbHelper.ITEM_TAG_PRIMARY + " = '" + filter + "'";
+                                ? CodeBriefcaseDatabase.ITEM_STARRED + " = 1"
+                                : CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " = '" + filter + "'";
                     }
-                    return new CursorLoader(this, AppContentProvider.ITEM_JOIN_TAG_URI,
-                            new String[]{AppDbHelper.ITEM_TABLE + "." + AppDbHelper.ITEM_ID,
-                                    AppDbHelper.ITEM_TAG_PRIMARY, AppDbHelper.ITEM_DESCRIPTION,
-                                    AppDbHelper.ITEM_DATE_UPDATED, AppDbHelper.ITEM_TAG_SECONDARY,
-                                    AppDbHelper.TAG_COLOR, AppDbHelper.ITEM_STARRED}, where, null,
-                            AppDbHelper.ITEM_DATE_UPDATED + " DESC");
+                    return new CursorLoader(this, CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
+                            new String[]{CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID,
+                                    CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
+                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY,
+                                    CodeBriefcaseDatabase.TAG_COLOR, CodeBriefcaseDatabase.ITEM_STARRED}, where, null,
+                            CodeBriefcaseDatabase.ITEM_DATE_UPDATED + " DESC");
                 }
                 else {
-                    return new CursorLoader(this, AppContentProvider.ITEM_SEARCH_JOIN_TAG_URI,
-                            new String[]{"docid as _id", AppDbHelper.ITEM_TAG_PRIMARY, AppDbHelper.ITEM_DESCRIPTION,
-                                    AppDbHelper.ITEM_DATE_UPDATED, AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.TAG_COLOR,
-                                    AppDbHelper.ITEM_STARRED}, "item_search MATCH ?",
-                            new String[]{searchQuery}, AppDbHelper.ITEM_DATE_UPDATED + " DESC");
+                    return new CursorLoader(this, CodeBriefcaseProvider.ITEM_SEARCH_JOIN_TAG_URI,
+                            new String[]{"docid as _id", CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
+                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.TAG_COLOR,
+                                    CodeBriefcaseDatabase.ITEM_STARRED}, "item_search MATCH ?",
+                            new String[]{searchQuery}, CodeBriefcaseDatabase.ITEM_DATE_UPDATED + " DESC");
                 }
             case TAGS_LOADER:
-                return new CursorLoader(this, AppContentProvider.ITEM_JOIN_TAG_URI,
-                        new String[]{"DISTINCT " + AppDbHelper.TAG_TABLE + "." + AppDbHelper.TAG_ID,
-                                AppDbHelper.ITEM_TAG_PRIMARY}, null, null,
-                        AppDbHelper.ITEM_TAG_PRIMARY + " COLLATE NOCASE ASC");
+                return new CursorLoader(this, CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
+                        new String[]{"DISTINCT " + CodeBriefcaseDatabase.TAG_TABLE + "." + CodeBriefcaseDatabase.TAG_ID,
+                                CodeBriefcaseDatabase.ITEM_TAG_PRIMARY}, null, null,
+                        CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " COLLATE NOCASE ASC");
         }
         return null;
     }
@@ -250,7 +250,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 submenu.add("Starred").setIcon(R.drawable.ic_drawer_star).setCheckable(true);
                 while (cursor.moveToNext()) {
                     submenu
-                            .add(cursor.getString(cursor.getColumnIndex(AppDbHelper.ITEM_TAG_PRIMARY)))
+                            .add(cursor.getString(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY)))
                             .setCheckable(true);
                 }
                 submenu.setGroupCheckable(R.id.nav_filters, true, true);
@@ -337,10 +337,10 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
-        values.put(AppDbHelper.ITEM_STARRED, newVal);
+        values.put(CodeBriefcaseDatabase.ITEM_STARRED, newVal);
 
         try {
-            cr.update(AppContentProvider.ITEM_URI.buildUpon().appendPath(Long.toString(rowid)).build(), values, null, null);
+            cr.update(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(Long.toString(rowid)).build(), values, null, null);
         }
         catch (SQLException e) {
             Toast.makeText(this, "Error updating record.", Toast.LENGTH_LONG).show();

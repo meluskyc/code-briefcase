@@ -11,9 +11,9 @@ import android.support.annotation.NonNull;
 
 
 @SuppressWarnings("ConstantConditions")
-public class AppContentProvider extends ContentProvider {
+public class CodeBriefcaseProvider extends ContentProvider {
 
-    private AppDbHelper dbHelper;
+    private CodeBriefcaseDatabase dbHelper;
 
     private static final String AUTHORITY = "org.meluskyc.codebriefcase";
     public static final String ITEM_PATH = "item";
@@ -48,7 +48,7 @@ public class AppContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        dbHelper = AppDbHelper.getInstance(getContext());
+        dbHelper = CodeBriefcaseDatabase.getInstance(getContext());
         return true;
     }
 
@@ -60,11 +60,11 @@ public class AppContentProvider extends ContentProvider {
 
         switch (uriMatcher.match(uri)) {
             case ITEM:
-                id = db.insert(AppDbHelper.ITEM_TABLE, null, values);
+                id = db.insert(CodeBriefcaseDatabase.ITEM_TABLE, null, values);
                 newRow = Uri.parse(ITEM_PATH + "/" + id);
                 break;
             case TAG:
-                id = db.insert(AppDbHelper.TAG_TABLE, null, values);
+                id = db.insert(CodeBriefcaseDatabase.TAG_TABLE, null, values);
                 newRow = Uri.parse(TAG_PATH + "/" + id);
                 break;
             default:
@@ -85,30 +85,30 @@ public class AppContentProvider extends ContentProvider {
 
         switch (uriMatcher.match(uri)) {
             case ITEM:
-                qb.setTables(AppDbHelper.ITEM_TABLE);
+                qb.setTables(CodeBriefcaseDatabase.ITEM_TABLE);
                 break;
             case ITEM_ID:
-                qb.setTables(AppDbHelper.ITEM_TABLE);
-                qb.appendWhere(AppDbHelper.ITEM_ID + " = " + uri.getLastPathSegment());
+                qb.setTables(CodeBriefcaseDatabase.ITEM_TABLE);
+                qb.appendWhere(CodeBriefcaseDatabase.ITEM_ID + " = " + uri.getLastPathSegment());
                 break;
             case ITEM_JOIN_TAG:
-                qb.setTables(AppDbHelper.ITEM_TABLE + " INNER JOIN " + AppDbHelper.TAG_TABLE
-                        + " ON " + AppDbHelper.ITEM_TABLE + "." + AppDbHelper.ITEM_TAG_PRIMARY + " = "
-                        + AppDbHelper.TAG_TABLE + "." + AppDbHelper.TAG_NAME);
+                qb.setTables(CodeBriefcaseDatabase.ITEM_TABLE + " INNER JOIN " + CodeBriefcaseDatabase.TAG_TABLE
+                        + " ON " + CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " = "
+                        + CodeBriefcaseDatabase.TAG_TABLE + "." + CodeBriefcaseDatabase.TAG_NAME);
                 break;
             case ITEM_SEARCH_JOIN_TAG:
-                qb.setTables(AppDbHelper.ITEM_SEARCH_TABLE + " INNER JOIN " + AppDbHelper.TAG_TABLE
-                        + " ON " + AppDbHelper.ITEM_SEARCH_TABLE + "." + AppDbHelper.ITEM_TAG_PRIMARY + " = "
-                        + AppDbHelper.TAG_TABLE + "." + AppDbHelper.TAG_NAME);
+                qb.setTables(CodeBriefcaseDatabase.ITEM_SEARCH_TABLE + " INNER JOIN " + CodeBriefcaseDatabase.TAG_TABLE
+                        + " ON " + CodeBriefcaseDatabase.ITEM_SEARCH_TABLE + "." + CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " = "
+                        + CodeBriefcaseDatabase.TAG_TABLE + "." + CodeBriefcaseDatabase.TAG_NAME);
                 break;
             case ITEM_ID_JOIN_TAG:
-                qb.setTables(AppDbHelper.ITEM_TABLE + " INNER JOIN " + AppDbHelper.TAG_TABLE
-                        + " ON " + AppDbHelper.ITEM_TABLE + "." + AppDbHelper.ITEM_TAG_PRIMARY + " = "
-                        + AppDbHelper.TAG_TABLE + "." + AppDbHelper.TAG_NAME);
-                qb.appendWhere(AppDbHelper.ITEM_TABLE + "." + AppDbHelper.ITEM_ID + " = " + uri.getPathSegments().get(1));
+                qb.setTables(CodeBriefcaseDatabase.ITEM_TABLE + " INNER JOIN " + CodeBriefcaseDatabase.TAG_TABLE
+                        + " ON " + CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " = "
+                        + CodeBriefcaseDatabase.TAG_TABLE + "." + CodeBriefcaseDatabase.TAG_NAME);
+                qb.appendWhere(CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID + " = " + uri.getPathSegments().get(1));
                 break;
             case TAG:
-                qb.setTables(AppDbHelper.TAG_TABLE);
+                qb.setTables(CodeBriefcaseDatabase.TAG_TABLE);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -129,20 +129,20 @@ public class AppContentProvider extends ContentProvider {
 
         switch (uriMatcher.match(uri)){
             case ITEM:
-                count = db.update(AppDbHelper.ITEM_TABLE, values, selection, selectionArgs);
+                count = db.update(CodeBriefcaseDatabase.ITEM_TABLE, values, selection, selectionArgs);
                 break;
             case ITEM_ID:
                 notifyUri = ITEM_URI;
-                count = db.update(AppDbHelper.ITEM_TABLE, values,
+                count = db.update(CodeBriefcaseDatabase.ITEM_TABLE, values,
                         appendIdToSelection(selection, uri.getLastPathSegment()),
                         selectionArgs);
                 break;
             case TAG:
-                count = db.update(AppDbHelper.TAG_TABLE, values, selection, selectionArgs);
+                count = db.update(CodeBriefcaseDatabase.TAG_TABLE, values, selection, selectionArgs);
                 break;
             case TAG_ID:
                 notifyUri = TAG_URI;
-                count = db.update(AppDbHelper.TAG_TABLE, values,
+                count = db.update(CodeBriefcaseDatabase.TAG_TABLE, values,
                         appendIdToSelection(selection, uri.getLastPathSegment()),
                         selectionArgs);
                 break;
@@ -162,19 +162,19 @@ public class AppContentProvider extends ContentProvider {
 
         switch (uriMatcher.match(uri)){
             case ITEM:
-                count = db.delete(AppDbHelper.ITEM_TABLE, selection, selectionArgs);
+                count = db.delete(CodeBriefcaseDatabase.ITEM_TABLE, selection, selectionArgs);
                 break;
             case ITEM_ID:
                 notifyUri = ITEM_URI;
-                count = db.delete(AppDbHelper.ITEM_TABLE,
+                count = db.delete(CodeBriefcaseDatabase.ITEM_TABLE,
                         appendIdToSelection(selection, uri.getLastPathSegment()),
                         selectionArgs);
             case TAG:
-                count = db.delete(AppDbHelper.TAG_TABLE, selection, selectionArgs);
+                count = db.delete(CodeBriefcaseDatabase.TAG_TABLE, selection, selectionArgs);
                 break;
             case TAG_ID:
                 notifyUri = TAG_URI;
-                count = db.delete(AppDbHelper.TAG_TABLE,
+                count = db.delete(CodeBriefcaseDatabase.TAG_TABLE,
                         appendIdToSelection(selection, uri.getLastPathSegment()),
                         selectionArgs);
                 break;
@@ -194,8 +194,8 @@ public class AppContentProvider extends ContentProvider {
         int id = Integer.valueOf(sId);
 
         if (selection == null || selection.trim().equals(""))
-            return AppDbHelper.ITEM_ID + " = " + id;
+            return CodeBriefcaseDatabase.ITEM_ID + " = " + id;
         else
-            return selection + " AND " + AppDbHelper.ITEM_ID + " = " + id;
+            return selection + " AND " + CodeBriefcaseDatabase.ITEM_ID + " = " + id;
     }
 }

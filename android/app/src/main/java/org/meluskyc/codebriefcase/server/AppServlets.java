@@ -17,8 +17,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.database.AppContentProvider;
-import org.meluskyc.codebriefcase.database.AppDbHelper;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseProvider;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseDatabase;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -120,22 +120,22 @@ public class AppServlets extends AppRouter {
 
             switch (uriResource.initParameter(Integer.class)) {
                 case ITEMS:
-                    c = cr.query(AppContentProvider.ITEM_JOIN_TAG_URI,
-                            new String[]{AppDbHelper.ITEM_TABLE + "." + AppDbHelper.ITEM_ID, AppDbHelper.ITEM_TAG_PRIMARY, AppDbHelper.ITEM_DESCRIPTION,
-                                    AppDbHelper.ITEM_DATE_UPDATED, AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.TAG_COLOR, AppDbHelper.ITEM_STARRED}, null, null,
-                            AppDbHelper.ITEM_DATE_UPDATED + " DESC");
+                    c = cr.query(CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
+                            new String[]{CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
+                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.TAG_COLOR, CodeBriefcaseDatabase.ITEM_STARRED}, null, null,
+                            CodeBriefcaseDatabase.ITEM_DATE_UPDATED + " DESC");
                     text = cur2Json(c).toString();
                     break;
                 case ITEM_DISTINCT_TAGS:
-                    c = cr.query(AppContentProvider.ITEM_JOIN_TAG_URI,
-                            new String[]{"DISTINCT " + AppDbHelper.ITEM_TAG_PRIMARY}, null, null, AppDbHelper.ITEM_TAG_PRIMARY +
+                    c = cr.query(CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
+                            new String[]{"DISTINCT " + CodeBriefcaseDatabase.ITEM_TAG_PRIMARY}, null, null, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY +
                                     " COLLATE NOCASE ASC");
                     text = cur2Json(c).toString();
                     break;
                 case ITEM_BY_ID:
-                    c = cr.query(AppContentProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(("_id"))).appendPath(AppContentProvider.TAG_PATH).build(),
-                            new String[]{AppDbHelper.ITEM_TABLE + "." + AppDbHelper.ITEM_ID, AppDbHelper.ITEM_TAG_PRIMARY, AppDbHelper.ITEM_DESCRIPTION,
-                                    AppDbHelper.ITEM_DATE_UPDATED, AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.ITEM_CONTENT, AppDbHelper.TAG_ACE_MODE}, null,
+                    c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(("_id"))).appendPath(CodeBriefcaseProvider.TAG_PATH).build(),
+                            new String[]{CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
+                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT, CodeBriefcaseDatabase.TAG_ACE_MODE}, null,
                             null, null);
 
                     if (c.getCount() > 0) {
@@ -167,9 +167,9 @@ public class AppServlets extends AppRouter {
 
             switch (uriResource.initParameter(Integer.class)) {
                 case ITEM_BY_ID:
-                    c = cr.query(AppContentProvider.ITEM_URI.buildUpon().appendPath(urlParams.get("_id")).build(),
-                            new String[]{AppDbHelper.ITEM_DESCRIPTION, AppDbHelper.ITEM_TAG_PRIMARY,
-                                    AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.ITEM_CONTENT}, null, null, null);
+                    c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get("_id")).build(),
+                            new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
+                                    CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
                     if (c.getCount() > 0) {
                         JSONArray arr = cur2Json(c);
                         try {
@@ -178,7 +178,7 @@ public class AppServlets extends AppRouter {
                             Log.e(LOG_TAG, "Unable to parse JSON: " + e.getMessage());
                         }
                     }
-                    cr.delete(AppContentProvider.ITEM_URI, "_id = " + urlParams.get("_id"), null);
+                    cr.delete(CodeBriefcaseProvider.ITEM_URI, "_id = " + urlParams.get("_id"), null);
                     break;
             }
             ByteArrayInputStream inp = new ByteArrayInputStream(text.getBytes());
@@ -210,26 +210,26 @@ public class AppServlets extends AppRouter {
                         JSONObject item = new JSONObject(bufferText);
 
                         // set a description and tag if none were entered
-                        description = item.getString(AppDbHelper.ITEM_DESCRIPTION);
-                        tag_primary = item.getString(AppDbHelper.ITEM_TAG_PRIMARY);
+                        description = item.getString(CodeBriefcaseDatabase.ITEM_DESCRIPTION);
+                        tag_primary = item.getString(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY);
                         description = TextUtils.isEmpty(description) ?
                                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
                                 : description;
                         tag_primary = (TextUtils.isEmpty(tag_primary) || tag_primary.equals("Tag"))
                                 ? "Text" : tag_primary;
 
-                        values.put(AppDbHelper.ITEM_DESCRIPTION, description);
-                        values.put(AppDbHelper.ITEM_CONTENT, item.getString(AppDbHelper.ITEM_CONTENT));
-                        values.put(AppDbHelper.ITEM_TAG_PRIMARY, tag_primary);
-                        values.put(AppDbHelper.ITEM_TAG_SECONDARY, item.getString(AppDbHelper.ITEM_TAG_SECONDARY));
-                        values.put(AppDbHelper.ITEM_DATE_CREATED, System.currentTimeMillis());
-                        values.put(AppDbHelper.ITEM_DATE_UPDATED, System.currentTimeMillis());
+                        values.put(CodeBriefcaseDatabase.ITEM_DESCRIPTION, description);
+                        values.put(CodeBriefcaseDatabase.ITEM_CONTENT, item.getString(CodeBriefcaseDatabase.ITEM_CONTENT));
+                        values.put(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, tag_primary);
+                        values.put(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, item.getString(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY));
+                        values.put(CodeBriefcaseDatabase.ITEM_DATE_CREATED, System.currentTimeMillis());
+                        values.put(CodeBriefcaseDatabase.ITEM_DATE_UPDATED, System.currentTimeMillis());
 
-                        Uri newRow = cr.insert(AppContentProvider.ITEM_URI, values);
+                        Uri newRow = cr.insert(CodeBriefcaseProvider.ITEM_URI, values);
 
-                        c = cr.query(AppContentProvider.ITEM_URI.buildUpon().appendPath(newRow.getLastPathSegment()).build(),
-                                new String[]{AppDbHelper.ITEM_DESCRIPTION, AppDbHelper.ITEM_TAG_PRIMARY,
-                                        AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.ITEM_CONTENT}, null, null, null);
+                        c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(newRow.getLastPathSegment()).build(),
+                                new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
+                                        CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
                         text = cur2Json(c).getJSONObject(0).toString();
                     } catch (IOException e) {
                         return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", null);
@@ -265,22 +265,22 @@ public class AppServlets extends AppRouter {
                         bufferText = new String(buffer);
                         JSONObject item = new JSONObject(bufferText);
 
-                        if (item.has(AppDbHelper.ITEM_STARRED)) {
-                            values.put(AppDbHelper.ITEM_STARRED, item.getString(AppDbHelper.ITEM_STARRED));
+                        if (item.has(CodeBriefcaseDatabase.ITEM_STARRED)) {
+                            values.put(CodeBriefcaseDatabase.ITEM_STARRED, item.getString(CodeBriefcaseDatabase.ITEM_STARRED));
                         }
-                        else if (item.has(AppDbHelper.ITEM_CONTENT)) {
-                            values.put(AppDbHelper.ITEM_CONTENT, item.getString(AppDbHelper.ITEM_CONTENT));
-                            values.put(AppDbHelper.ITEM_DESCRIPTION, item.getString(AppDbHelper.ITEM_DESCRIPTION));
-                            values.put(AppDbHelper.ITEM_TAG_PRIMARY, item.getString(AppDbHelper.ITEM_TAG_PRIMARY));
-                            values.put(AppDbHelper.ITEM_TAG_SECONDARY, item.getString(AppDbHelper.ITEM_TAG_SECONDARY));
-                            values.put(AppDbHelper.ITEM_DATE_UPDATED, System.currentTimeMillis());
+                        else if (item.has(CodeBriefcaseDatabase.ITEM_CONTENT)) {
+                            values.put(CodeBriefcaseDatabase.ITEM_CONTENT, item.getString(CodeBriefcaseDatabase.ITEM_CONTENT));
+                            values.put(CodeBriefcaseDatabase.ITEM_DESCRIPTION, item.getString(CodeBriefcaseDatabase.ITEM_DESCRIPTION));
+                            values.put(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, item.getString(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY));
+                            values.put(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, item.getString(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY));
+                            values.put(CodeBriefcaseDatabase.ITEM_DATE_UPDATED, System.currentTimeMillis());
                         }
 
-                        cr.update(AppContentProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(AppDbHelper.ITEM_ID)).build(), values, null, null);
+                        cr.update(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(CodeBriefcaseDatabase.ITEM_ID)).build(), values, null, null);
 
-                        c = cr.query(AppContentProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(AppDbHelper.ITEM_ID)).build(),
-                                new String[]{AppDbHelper.ITEM_DESCRIPTION, AppDbHelper.ITEM_TAG_PRIMARY,
-                                        AppDbHelper.ITEM_TAG_SECONDARY, AppDbHelper.ITEM_CONTENT}, null, null, null);
+                        c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(CodeBriefcaseDatabase.ITEM_ID)).build(),
+                                new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
+                                        CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
                         text = cur2Json(c).getJSONObject(0).toString();
                     } catch (IOException e) {
                         return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", null);
@@ -322,8 +322,8 @@ public class AppServlets extends AppRouter {
 
             switch (uriResource.initParameter(Integer.class)) {
                 case TAGS:
-                    c = cr.query(AppContentProvider.TAG_URI,
-                            new String[]{AppDbHelper.TAG_NAME}, null, null, AppDbHelper.TAG_NAME + " ASC");
+                    c = cr.query(CodeBriefcaseProvider.TAG_URI,
+                            new String[]{CodeBriefcaseDatabase.TAG_NAME}, null, null, CodeBriefcaseDatabase.TAG_NAME + " ASC");
                     text = cur2Json(c).toString();
                     break;
             }
