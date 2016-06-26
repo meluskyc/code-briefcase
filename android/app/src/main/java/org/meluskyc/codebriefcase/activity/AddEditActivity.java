@@ -18,8 +18,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.database.CodeBriefcaseProvider;
-import org.meluskyc.codebriefcase.database.CodeBriefcaseDatabase;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Item;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,10 +36,9 @@ public class AddEditActivity extends BaseActivity {
             rowid = getIntent().getLongExtra("rowid", 0);
             ContentResolver cr = getContentResolver();
 
-            Cursor c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon()
-                            .appendPath(Long.toString(rowid)).build(),
-                    new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
-                            CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
+            Cursor c = cr.query(Item.buildItemUri(rowid),
+                    new String[]{Item.ITEM_DESCRIPTION, Item.ITEM_TAG_PRIMARY,
+                            Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
 
             if (!c.moveToFirst()) {
                 this.setTitle(getString(R.string.add_a_snippet));
@@ -130,22 +128,21 @@ public class AddEditActivity extends BaseActivity {
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) : description;
         tag = (tag.equals("Tag")) ? "Text" : tag;
 
-        values.put(CodeBriefcaseDatabase.ITEM_DESCRIPTION, description);
-        values.put(CodeBriefcaseDatabase.ITEM_CONTENT, ((EditText)
+        values.put(Item.ITEM_DESCRIPTION, description);
+        values.put(Item.ITEM_CONTENT, ((EditText)
                 findViewById(R.id.addedit_edit_content)).getText().toString());
-        values.put(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, tag);
-        values.put(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, ((EditText)
+        values.put(Item.ITEM_TAG_PRIMARY, tag);
+        values.put(Item.ITEM_TAG_SECONDARY, ((EditText)
                 findViewById(R.id.addedit_edit_tag_secondary)).getText().toString());
-        values.put(CodeBriefcaseDatabase.ITEM_DATE_UPDATED, System.currentTimeMillis());
+        values.put(Item.ITEM_DATE_UPDATED, System.currentTimeMillis());
 
         try {
             if (rowid == null) {
-                values.put(CodeBriefcaseDatabase.ITEM_DATE_CREATED, System.currentTimeMillis());
-                cr.insert(CodeBriefcaseProvider.ITEM_URI, values);
+                values.put(Item.ITEM_DATE_CREATED, System.currentTimeMillis());
+                cr.insert(Item.CONTENT_URI, values);
                 finish();
             } else {
-                cr.update(CodeBriefcaseProvider.ITEM_URI.buildUpon()
-                        .appendPath(Long.toString(rowid)).build(), values, null, null);
+                cr.update(Item.buildItemUri(rowid), values, null, null);
                 Toast.makeText(this, getString(R.string.updated), Toast.LENGTH_LONG).show();
             }
 
@@ -167,7 +164,7 @@ public class AddEditActivity extends BaseActivity {
 
                             try {
                                 long rowid = getArguments().getLong("rowid");
-                                cr.delete(CodeBriefcaseProvider.ITEM_URI, "_id = " + rowid, null);
+                                cr.delete(Item.buildItemUri(rowid), null, null);
                                 getActivity().finish();
                             } catch (SQLException e) {
                                 Toast.makeText(getActivity(), getString(R.string.unable_to_delete), Toast.LENGTH_LONG).show();

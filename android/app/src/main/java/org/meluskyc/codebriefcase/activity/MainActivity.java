@@ -11,6 +11,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -33,18 +34,26 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.database.CodeBriefcaseProvider;
-import org.meluskyc.codebriefcase.database.CodeBriefcaseDatabase;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Item;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.ItemSearch;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Qualified;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Tag;
+import org.meluskyc.codebriefcase.utils.AppUtils;
+
+import java.util.HashMap;
 
 
 public class MainActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SearchView.OnQueryTextListener {
 
+    private final int FILTER_NONE = -1;
+    private final int FILTER_STARRED = -2;
+
     private SimpleCursorAdapter itemsAdapter;
     private ListView itemsList;
     private final int ITEMS_LOADER = 1;
     private String searchQuery = "";
-    private String filter = "";
+    private long filter = FILTER_NONE;
     private SearchView searchView;
 
     private Toolbar toolbar;
@@ -53,10 +62,14 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     private final int TAGS_LOADER = 2;
     private final int FILTER_GROUP = -1;
 
+    // store tag IDs for each tag filter
+    private HashMap<String, Long> filterIdsMap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         super.onCreate(savedInstanceState);
+        filterIdsMap = new HashMap<>();
         setContentView(R.layout.activity_main);
 
         setupFab();
@@ -90,26 +103,27 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     private void setupItemsView() {
         itemsAdapter = new SimpleCursorAdapter(this, R.layout.item_main, null,
-                new String[]{CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
-                        CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.TAG_COLOR,
-                        CodeBriefcaseDatabase.ITEM_STARRED},
+                new String[]{Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
+                        Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY, Tag.TAG_COLOR,
+                        Item.ITEM_STARRED},
                 new int[] {R.id.main_text_tag_primary, R.id.main_text_description, R.id.main_text_date_updated,
                         R.id.main_text_tag_secondary, SimpleCursorAdapter.NO_SELECTION, R.id.main_image_starred}, 0);
 
         itemsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+
                 switch (columnIndex) {
                     case 1:
-                        view.setBackgroundColor(Color.parseColor(cursor.getString(cursor.getColumnIndex(CodeBriefcaseDatabase.TAG_COLOR))));
-                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY)));
+                        view.setBackgroundColor(Color.parseColor(cursor.getString(cursor.getColumnIndex(Tag.TAG_COLOR))));
+                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Item.ITEM_TAG_PRIMARY)));
                         return true;
                     case 3:
-                        long dateLong = cursor.getLong(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_DATE_UPDATED));
+                        long dateLong = cursor.getLong(cursor.getColumnIndex(Item.ITEM_DATE_UPDATED));
                         ((TextView) view).setText(DateUtils.getRelativeTimeSpanString(dateLong,
                                 System.currentTimeMillis(), DateUtils.FORMAT_ABBREV_RELATIVE));
                         return true;
                     case 6:
-                        switch (cursor.getInt(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_STARRED))) {
+                        switch (cursor.getInt(cursor.getColumnIndex(Item.ITEM_STARRED))) {
                             case 0:
                                 ((ImageView) view).setImageResource(R.drawable.ic_star_outline_24dp);
                                 view.setTag(0);
@@ -186,11 +200,11 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                                 break;
                             default:
-                                if (filter.equals(menuItem.toString())) {
-                                    filter = "";
+                                if (filter == filterIdsMap.get(menuItem.toString())) {
+                                    filter = FILTER_NONE;
                                     menuItem.setChecked(false);
                                 } else {
-                                    filter = menuItem.toString();
+                                    filter = filterIdsMap.get(menuItem.toString());
                                 }
 
                                 getLoaderManager().restartLoader(ITEMS_LOADER, null, MainActivity.this);
@@ -208,31 +222,32 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         switch (id) {
             case ITEMS_LOADER:
                 if (TextUtils.isEmpty(searchQuery)) {
-                    String where = "";
-                    if (!TextUtils.isEmpty(filter)) {
-                        where = filter.equals("Starred")
-                                ? CodeBriefcaseDatabase.ITEM_STARRED + " = 1"
-                                : CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " = '" + filter + "'";
+                    final Uri uri;
+                    if (filter == FILTER_STARRED) {
+                        uri = Item.buildStarredUri();
                     }
-                    return new CursorLoader(this, CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
-                            new String[]{CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID,
-                                    CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
-                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY,
-                                    CodeBriefcaseDatabase.TAG_COLOR, CodeBriefcaseDatabase.ITEM_STARRED}, where, null,
-                            CodeBriefcaseDatabase.ITEM_DATE_UPDATED + " DESC");
+                    else {
+                        uri = Item.buildTagDirUri(filter);
+                    }
+                    return new CursorLoader(this, uri, new String[]{Qualified.ITEM_ID,
+                        Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
+                        Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY,
+                        Tag.TAG_COLOR, Item.ITEM_STARRED}, null, null,
+                            Item.ITEM_DATE_UPDATED + " DESC");
                 }
                 else {
-                    return new CursorLoader(this, CodeBriefcaseProvider.ITEM_SEARCH_JOIN_TAG_URI,
-                            new String[]{"docid as _id", CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
-                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.TAG_COLOR,
-                                    CodeBriefcaseDatabase.ITEM_STARRED}, "item_search MATCH ?",
-                            new String[]{searchQuery}, CodeBriefcaseDatabase.ITEM_DATE_UPDATED + " DESC");
+                    return new CursorLoader(this, Item.buildSearchUri(searchQuery),
+                            new String[]{ItemSearch.ITEM_SEARCH_DOCID + " AS _id",
+                            Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
+                            Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY,
+                            Tag.TAG_COLOR, Item.ITEM_STARRED}, null, null,
+                            Item.ITEM_DATE_UPDATED + " DESC");
                 }
             case TAGS_LOADER:
-                return new CursorLoader(this, CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
-                        new String[]{"DISTINCT " + CodeBriefcaseDatabase.TAG_TABLE + "." + CodeBriefcaseDatabase.TAG_ID,
-                                CodeBriefcaseDatabase.ITEM_TAG_PRIMARY}, null, null,
-                        CodeBriefcaseDatabase.ITEM_TAG_PRIMARY + " COLLATE NOCASE ASC");
+                return new CursorLoader(this, Item.buildTagDirUri(),
+                        new String[]{AppUtils.formatQueryDistinctParameter(Qualified.TAG_ID),
+                                Item.ITEM_TAG_PRIMARY}, null, null,
+                        Item.ITEM_TAG_PRIMARY + " COLLATE NOCASE ASC");
         }
         return null;
     }
@@ -244,14 +259,22 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 itemsAdapter.swapCursor(cursor);
                 break;
             case TAGS_LOADER:
+                filterIdsMap.clear();
                 Menu menu = navigationView.getMenu();
                 menu.removeGroup(R.id.nav_filters);
                 SubMenu submenu = menu.addSubMenu(R.id.nav_filters, Menu.NONE, Menu.NONE, "Filter");
-                submenu.add("Starred").setIcon(R.drawable.ic_drawer_star).setCheckable(true);
+                MenuItem itemStarred = submenu
+                        .add("Starred")
+                        .setIcon(R.drawable.ic_drawer_star)
+                        .setCheckable(true);
+                filterIdsMap.put("Starred", (long) FILTER_STARRED);
                 while (cursor.moveToNext()) {
-                    submenu
-                            .add(cursor.getString(cursor.getColumnIndex(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY)))
+                    MenuItem newItem = submenu
+                            .add(cursor.getString(cursor.getColumnIndex(Item.ITEM_TAG_PRIMARY)))
                             .setCheckable(true);
+
+                    filterIdsMap.put(newItem.toString(),
+                            cursor.getLong(cursor.getColumnIndex(Tag.TAG_ID)));
                 }
                 submenu.setGroupCheckable(R.id.nav_filters, true, true);
 
@@ -337,10 +360,10 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
-        values.put(CodeBriefcaseDatabase.ITEM_STARRED, newVal);
+        values.put(Item.ITEM_STARRED, newVal);
 
         try {
-            cr.update(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(Long.toString(rowid)).build(), values, null, null);
+            cr.update(Item.buildItemUri(rowid), values, null, null);
         }
         catch (SQLException e) {
             Toast.makeText(this, "Error updating record.", Toast.LENGTH_LONG).show();

@@ -17,8 +17,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.database.CodeBriefcaseProvider;
-import org.meluskyc.codebriefcase.database.CodeBriefcaseDatabase;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Item;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Qualified;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Tag;
+import org.meluskyc.codebriefcase.utils.AppUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -120,23 +122,34 @@ public class AppServlets extends AppRouter {
 
             switch (uriResource.initParameter(Integer.class)) {
                 case ITEMS:
-                    c = cr.query(CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
-                            new String[]{CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
-                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.TAG_COLOR, CodeBriefcaseDatabase.ITEM_STARRED}, null, null,
-                            CodeBriefcaseDatabase.ITEM_DATE_UPDATED + " DESC");
+                    c = cr.query(Item.buildTagDirUri(),
+                            new String[]{Qualified.ITEM_ID, Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
+                                    Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY, Tag.TAG_COLOR, Item.ITEM_STARRED}, null, null,
+                            Item.ITEM_DATE_UPDATED + " DESC");
                     text = cur2Json(c).toString();
                     break;
                 case ITEM_DISTINCT_TAGS:
-                    c = cr.query(CodeBriefcaseProvider.ITEM_JOIN_TAG_URI,
-                            new String[]{"DISTINCT " + CodeBriefcaseDatabase.ITEM_TAG_PRIMARY}, null, null, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY +
-                                    " COLLATE NOCASE ASC");
+                    c = cr.query(Item.buildTagDirUri(),
+                            new String[]{AppUtils
+                                    .formatQueryDistinctParameter(Item.ITEM_TAG_PRIMARY)},
+                            null, null, Item.ITEM_TAG_PRIMARY + " COLLATE NOCASE ASC");
                     text = cur2Json(c).toString();
                     break;
                 case ITEM_BY_ID:
-                    c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(("_id"))).appendPath(CodeBriefcaseProvider.TAG_PATH).build(),
-                            new String[]{CodeBriefcaseDatabase.ITEM_TABLE + "." + CodeBriefcaseDatabase.ITEM_ID, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, CodeBriefcaseDatabase.ITEM_DESCRIPTION,
-                                    CodeBriefcaseDatabase.ITEM_DATE_UPDATED, CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT, CodeBriefcaseDatabase.TAG_ACE_MODE}, null,
-                            null, null);
+                    long id;
+                    try {
+                        id = Long.parseLong(urlParams.get("_id"));
+                    }
+                    catch(NumberFormatException e) {
+                        return NanoHTTPD.newFixedLengthResponse(Response.Status.BAD_REQUEST,
+                                "text/plain", null);
+                    }
+
+                    c = cr.query(Item.buildTagItemUri(id),
+                            new String[]{Qualified.ITEM_ID, Item.ITEM_TAG_PRIMARY,
+                                    Item.ITEM_DESCRIPTION, Item.ITEM_DATE_UPDATED,
+                                    Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT,
+                                    Tag.TAG_ACE_MODE}, null, null, null);
 
                     if (c.getCount() > 0) {
                         JSONArray arr = cur2Json(c);
@@ -144,7 +157,8 @@ public class AppServlets extends AppRouter {
                             text = arr.getJSONObject(0).toString();
                         } catch (JSONException e) {
                             Log.e(LOG_TAG, "Unable to parse JSON: " + e.getMessage());
-                            return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", null);
+                            return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
+                                    "text/plain", null);
                         }
                     }
                     break;
@@ -167,9 +181,18 @@ public class AppServlets extends AppRouter {
 
             switch (uriResource.initParameter(Integer.class)) {
                 case ITEM_BY_ID:
-                    c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get("_id")).build(),
-                            new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
-                                    CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
+                    long id;
+                    try {
+                        id = Long.parseLong(urlParams.get("_id"));
+                    }
+                    catch(NumberFormatException e) {
+                        return NanoHTTPD.newFixedLengthResponse(Response.Status.BAD_REQUEST,
+                                "text/plain", null);
+                    }
+
+                    c = cr.query(Item.buildItemUri(id),
+                            new String[]{Item.ITEM_DESCRIPTION, Item.ITEM_TAG_PRIMARY,
+                                    Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
                     if (c.getCount() > 0) {
                         JSONArray arr = cur2Json(c);
                         try {
@@ -178,7 +201,11 @@ public class AppServlets extends AppRouter {
                             Log.e(LOG_TAG, "Unable to parse JSON: " + e.getMessage());
                         }
                     }
-                    cr.delete(CodeBriefcaseProvider.ITEM_URI, "_id = " + urlParams.get("_id"), null);
+                    else {
+                        return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
+                                "text/plain", null);
+                    }
+                    cr.delete(Item.buildItemUri(id), null, null);
                     break;
             }
             ByteArrayInputStream inp = new ByteArrayInputStream(text.getBytes());
@@ -210,26 +237,26 @@ public class AppServlets extends AppRouter {
                         JSONObject item = new JSONObject(bufferText);
 
                         // set a description and tag if none were entered
-                        description = item.getString(CodeBriefcaseDatabase.ITEM_DESCRIPTION);
-                        tag_primary = item.getString(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY);
+                        description = item.getString(Item.ITEM_DESCRIPTION);
+                        tag_primary = item.getString(Item.ITEM_TAG_PRIMARY);
                         description = TextUtils.isEmpty(description) ?
                                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
                                 : description;
                         tag_primary = (TextUtils.isEmpty(tag_primary) || tag_primary.equals("Tag"))
                                 ? "Text" : tag_primary;
 
-                        values.put(CodeBriefcaseDatabase.ITEM_DESCRIPTION, description);
-                        values.put(CodeBriefcaseDatabase.ITEM_CONTENT, item.getString(CodeBriefcaseDatabase.ITEM_CONTENT));
-                        values.put(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, tag_primary);
-                        values.put(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, item.getString(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY));
-                        values.put(CodeBriefcaseDatabase.ITEM_DATE_CREATED, System.currentTimeMillis());
-                        values.put(CodeBriefcaseDatabase.ITEM_DATE_UPDATED, System.currentTimeMillis());
+                        values.put(Item.ITEM_DESCRIPTION, description);
+                        values.put(Item.ITEM_CONTENT, item.getString(Item.ITEM_CONTENT));
+                        values.put(Item.ITEM_TAG_PRIMARY, tag_primary);
+                        values.put(Item.ITEM_TAG_SECONDARY, item.getString(Item.ITEM_TAG_SECONDARY));
+                        values.put(Item.ITEM_DATE_CREATED, System.currentTimeMillis());
+                        values.put(Item.ITEM_DATE_UPDATED, System.currentTimeMillis());
 
-                        Uri newRow = cr.insert(CodeBriefcaseProvider.ITEM_URI, values);
+                        Uri newRow = cr.insert(Item.CONTENT_URI, values);
 
-                        c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(newRow.getLastPathSegment()).build(),
-                                new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
-                                        CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
+                        c = cr.query(Item.buildItemUri(Long.parseLong(newRow.getLastPathSegment())),
+                                new String[]{Item.ITEM_DESCRIPTION, Item.ITEM_TAG_PRIMARY,
+                                        Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
                         text = cur2Json(c).getJSONObject(0).toString();
                     } catch (IOException e) {
                         return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", null);
@@ -265,22 +292,24 @@ public class AppServlets extends AppRouter {
                         bufferText = new String(buffer);
                         JSONObject item = new JSONObject(bufferText);
 
-                        if (item.has(CodeBriefcaseDatabase.ITEM_STARRED)) {
-                            values.put(CodeBriefcaseDatabase.ITEM_STARRED, item.getString(CodeBriefcaseDatabase.ITEM_STARRED));
+                        long id = Long.parseLong(urlParams.get(Item.ITEM_ID));
+
+                        if (item.has(Item.ITEM_STARRED)) {
+                            values.put(Item.ITEM_STARRED, item.getString(Item.ITEM_STARRED));
                         }
-                        else if (item.has(CodeBriefcaseDatabase.ITEM_CONTENT)) {
-                            values.put(CodeBriefcaseDatabase.ITEM_CONTENT, item.getString(CodeBriefcaseDatabase.ITEM_CONTENT));
-                            values.put(CodeBriefcaseDatabase.ITEM_DESCRIPTION, item.getString(CodeBriefcaseDatabase.ITEM_DESCRIPTION));
-                            values.put(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY, item.getString(CodeBriefcaseDatabase.ITEM_TAG_PRIMARY));
-                            values.put(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, item.getString(CodeBriefcaseDatabase.ITEM_TAG_SECONDARY));
-                            values.put(CodeBriefcaseDatabase.ITEM_DATE_UPDATED, System.currentTimeMillis());
+                        else if (item.has(Item.ITEM_CONTENT)) {
+                            values.put(Item.ITEM_CONTENT, item.getString(Item.ITEM_CONTENT));
+                            values.put(Item.ITEM_DESCRIPTION, item.getString(Item.ITEM_DESCRIPTION));
+                            values.put(Item.ITEM_TAG_PRIMARY, item.getString(Item.ITEM_TAG_PRIMARY));
+                            values.put(Item.ITEM_TAG_SECONDARY, item.getString(Item.ITEM_TAG_SECONDARY));
+                            values.put(Item.ITEM_DATE_UPDATED, System.currentTimeMillis());
                         }
 
-                        cr.update(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(CodeBriefcaseDatabase.ITEM_ID)).build(), values, null, null);
+                        cr.update(Item.buildItemUri(id), values, null, null);
 
-                        c = cr.query(CodeBriefcaseProvider.ITEM_URI.buildUpon().appendPath(urlParams.get(CodeBriefcaseDatabase.ITEM_ID)).build(),
-                                new String[]{CodeBriefcaseDatabase.ITEM_DESCRIPTION, CodeBriefcaseDatabase.ITEM_TAG_PRIMARY,
-                                        CodeBriefcaseDatabase.ITEM_TAG_SECONDARY, CodeBriefcaseDatabase.ITEM_CONTENT}, null, null, null);
+                        c = cr.query(Item.buildItemUri(id),
+                                new String[]{Item.ITEM_DESCRIPTION, Item.ITEM_TAG_PRIMARY,
+                                        Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
                         text = cur2Json(c).getJSONObject(0).toString();
                     } catch (IOException e) {
                         return NanoHTTPD.newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", null);
@@ -322,8 +351,8 @@ public class AppServlets extends AppRouter {
 
             switch (uriResource.initParameter(Integer.class)) {
                 case TAGS:
-                    c = cr.query(CodeBriefcaseProvider.TAG_URI,
-                            new String[]{CodeBriefcaseDatabase.TAG_NAME}, null, null, CodeBriefcaseDatabase.TAG_NAME + " ASC");
+                    c = cr.query(Tag.CONTENT_URI,
+                            new String[]{Tag.TAG_NAME}, null, null, Tag.TAG_NAME + " ASC");
                     text = cur2Json(c).toString();
                     break;
             }

@@ -6,91 +6,40 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import org.meluskyc.codebriefcase.R;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.ItemColumns;
+import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.TagColumns;
 
 public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "codebriefcase.db";
     private static final int DB_VERSION = 8;
 
-    // tables and fields
-    public static final String ITEM_TABLE = "item";
-    public static final String TAG_TABLE = "tag";
-    public static final String ITEM_SEARCH_TABLE = "item_search";
-    public static final String ITEM_ID = "_id";
-    public static final String ITEM_DESCRIPTION = "description";
-    public static final String ITEM_CONTENT = "content";
-    public static final String ITEM_DATE_CREATED = "date_created";
-    public static final String ITEM_DATE_UPDATED = "date_updated";
-    public static final String ITEM_TAG_PRIMARY = "tag_primary";
-    public static final String ITEM_TAG_SECONDARY = "tag_secondary";
-    public static final String ITEM_STARRED = "starred";
-    public static final String TAG_ID = "_id";
-    public static final String TAG_NAME = "name";
-    public static final String TAG_ACE_MODE = "ace_mode";
-    public static final String TAG_COLOR = "color";
+    interface Tables {
+        String ITEM = "item";
+        String TAG = "tag";
+        String ITEM_SEARCH = "item_search";
+        String ITEM_JOIN_TAG = "item INNER JOIN tag " +
+                "ON item.tag_primary = tag.name";
+        String ITEM_SEARCH_JOIN_TAG = "item_search INNER JOIN tag " +
+                "ON item_search.tag_primary = tag.name";
+    }
 
-    // SQL
-    private static final String SQL_CREATE_ITEM =
-            "CREATE TABLE item " +
-                    "(_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "description TEXT, " +
-                    "content TEXT, " +
-                    "date_created INTEGER, " +
-                    "date_updated INTEGER, " +
-                    "tag_primary TEXT, " +
-                    "tag_secondary TEXT, " +
-                    "starred INTEGER);";
+    private interface Triggers {
+        // Deletes from dependent tables when corresponding sessions are deleted.
+        String ITEM_SEARCH_BU = "item_search_bu";
+        String ITEM_SEARCH_BD = "item_search_bd";
+        String ITEM_SEARCH_AU = "item_search_au";
+        String ITEM_SEARCH_AI = "item_search_ai";
+    }
 
-    private static final String SQL_CREATE_TAG =
-            "CREATE TABLE tag " +
-                    "(_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "name TEXT, " +
-                    "ace_mode TEXT, " +
-                    "color TEXT);";
-
-    private static final String SQL_CREATE_ITEM_SEARCH =
-            "CREATE VIRTUAL TABLE item_search USING fts4 " +
-                    "(content='item', " +
-                    "description, " +
-                    "date_updated, " +
-                    "tag_primary, " +
-                    "tag_secondary, " +
-                    "starred);";
-
-    private static final String SQL_CREATE_TRIGGER_SEARCH_BU =
-            "CREATE TRIGGER search_bu BEFORE UPDATE ON item BEGIN " +
-                "DELETE FROM item_search WHERE docid=old.rowid;" +
-            "END;";
-
-    private static final String SQL_CREATE_TRIGGER_SEARCH_BD =
-            "CREATE TRIGGER search_bd BEFORE DELETE ON item BEGIN " +
-                    "DELETE FROM item_search WHERE docid=old.rowid;" +
-            "END;";
-
-    private static final String SQL_CREATE_TRIGGER_SEARCH_AU =
-            "CREATE TRIGGER search_au AFTER UPDATE ON item BEGIN " +
-                    "INSERT INTO item_search(docid, description, date_updated, " +
-                    "tag_primary, tag_secondary, starred) VALUES (new.rowid, new.description, " +
-                    "new.date_updated, new.tag_primary, new.tag_secondary, new.starred);" +
-            "END;";
-
-    private static final String SQL_CREATE_TRIGGER_SEARCH_AI =
-            "CREATE TRIGGER search_ai AFTER INSERT ON item BEGIN " +
-                    "INSERT INTO item_search(docid, description, date_updated, tag_primary, " +
-                    "tag_secondary, starred) VALUES (new.rowid, new.description, new.date_updated, " +
-                    "new.tag_primary, new.tag_secondary, new.starred);" +
-            "END;";
-
-    private static final String SQL_CREATE_TAG_INDEX = "CREATE INDEX tag_index ON tag (name);";
-
-    private static final String SQL_DROP_ITEM = "DROP TABLE IF EXISTS item;";
-    private static final String SQL_DROP_TAG = "DROP TABLE IF EXISTS tag;";
-    private static final String SQL_DROP_TAG_INDEX = "DROP INDEX IF EXISTS tag_index;";
-    private static final String SQL_DROP_ITEM_SEARCH = "DROP TABLE IF EXISTS item_search;";
-    private static final String SQL_DROP_TRIGGER_SEARCH_BU = "DROP TRIGGER IF EXISTS search_bu;";
-    private static final String SQL_DROP_TRIGGER_SEARCH_BD = "DROP TRIGGER IF EXISTS search_bd;";
-    private static final String SQL_DROP_TRIGGER_SEARCH_AU = "DROP TRIGGER IF EXISTS search_au;";
-    private static final String SQL_DROP_TRIGGER_SEARCH_AI = "DROP TRIGGER IF EXISTS search_ai;";
+    interface ItemSearchColumns {
+        String ITEM_SEARCH_DOCID = "docid";
+        String ITEM_SEARCH_DESCRIPTION = "description";
+        String ITEM_SEARCH_DATE_UPDATED = "date_updated";
+        String ITEM_SEARCH_TAG_PRIMARY = "tag_primary";
+        String ITEM_SEARCH_TAG_SECONDARY = "tag_secondary";
+        String ITEM_SEARCH_STARRED = "starred";
+    }
 
     private static CodeBriefcaseDatabase dbHelper;
     private Context context;
@@ -113,23 +62,74 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
         String[] tagAceModes = context.getResources().getStringArray(R.array.TagAceMode);
         String[] tagColors = context.getResources().getStringArray(R.array.TagColors);
 
-        db.execSQL(SQL_CREATE_ITEM);
-        db.execSQL(SQL_CREATE_TAG);
-        db.execSQL(SQL_CREATE_TAG_INDEX);
-        db.execSQL(SQL_CREATE_ITEM_SEARCH);
-        db.execSQL(SQL_CREATE_TRIGGER_SEARCH_BU);
-        db.execSQL(SQL_CREATE_TRIGGER_SEARCH_BD);
-        db.execSQL(SQL_CREATE_TRIGGER_SEARCH_AU);
-        db.execSQL(SQL_CREATE_TRIGGER_SEARCH_AI);
+        db.execSQL("CREATE TABLE " + Tables.ITEM + " ("
+                + ItemColumns.ITEM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + ItemColumns.ITEM_DESCRIPTION + " TEXT,"
+                + ItemColumns.ITEM_CONTENT + " TEXT,"
+                + ItemColumns.ITEM_DATE_CREATED + " INTEGER,"
+                + ItemColumns.ITEM_DATE_UPDATED + " INTEGER,"
+                + ItemColumns.ITEM_TAG_PRIMARY + " TEXT,"
+                + ItemColumns.ITEM_TAG_SECONDARY + " TEXT,"
+                + ItemColumns.ITEM_STARRED + " INTEGER)");
+
+        db.execSQL("CREATE TABLE " + Tables.TAG + " ("
+                + TagColumns.TAG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + TagColumns.TAG_NAME + " TEXT,"
+                + TagColumns.TAG_ACE_MODE + " TEXT,"
+                + TagColumns.TAG_COLOR + " TEXT)");
+
+        db.execSQL("CREATE VIRTUAL TABLE " + Tables.ITEM_SEARCH + " USING fts4("
+                + "content='" + Tables.ITEM + "', "
+                + ItemSearchColumns.ITEM_SEARCH_DESCRIPTION + ", "
+                + ItemSearchColumns.ITEM_SEARCH_DATE_UPDATED + ", "
+                + ItemSearchColumns.ITEM_SEARCH_TAG_PRIMARY + ", "
+                + ItemSearchColumns.ITEM_SEARCH_TAG_SECONDARY + ", "
+                + ItemSearchColumns.ITEM_SEARCH_STARRED + ")");
+
+        db.execSQL("CREATE TRIGGER " + Triggers.ITEM_SEARCH_BU + " BEFORE UPDATE ON "
+                + Tables.ITEM + " BEGIN DELETE FROM " + Tables.ITEM_SEARCH
+                + " WHERE " + ItemSearchColumns.ITEM_SEARCH_DOCID + "=old.rowid;END;");
+
+        db.execSQL("CREATE TRIGGER " + Triggers.ITEM_SEARCH_BD + " BEFORE DELETE ON "
+                + Tables.ITEM + " BEGIN DELETE FROM " + Tables.ITEM_SEARCH
+                + " WHERE " + ItemSearchColumns.ITEM_SEARCH_DOCID + "=old.rowid;END;");
+
+        db.execSQL("CREATE TRIGGER " + Triggers.ITEM_SEARCH_AU + " AFTER UPDATE ON "
+                + Tables.ITEM + " BEGIN INSERT INTO " + Tables.ITEM_SEARCH + "("
+                + ItemSearchColumns.ITEM_SEARCH_DOCID + ", "
+                + ItemSearchColumns.ITEM_SEARCH_DESCRIPTION + ", "
+                + ItemSearchColumns.ITEM_SEARCH_DATE_UPDATED + ", "
+                + ItemSearchColumns.ITEM_SEARCH_TAG_PRIMARY + ", "
+                + ItemSearchColumns.ITEM_SEARCH_TAG_SECONDARY + ", "
+                + ItemSearchColumns.ITEM_SEARCH_STARRED + ") VALUES (new.rowid, "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_DESCRIPTION + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_DATE_UPDATED + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_TAG_PRIMARY + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_TAG_SECONDARY + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_STARRED + ");END;");
+
+        db.execSQL("CREATE TRIGGER " + Triggers.ITEM_SEARCH_AI + " AFTER INSERT ON "
+                + Tables.ITEM + " BEGIN INSERT INTO " + Tables.ITEM_SEARCH + "("
+                + ItemSearchColumns.ITEM_SEARCH_DOCID + ", "
+                + ItemSearchColumns.ITEM_SEARCH_DESCRIPTION + ", "
+                + ItemSearchColumns.ITEM_SEARCH_DATE_UPDATED + ", "
+                + ItemSearchColumns.ITEM_SEARCH_TAG_PRIMARY + ", "
+                + ItemSearchColumns.ITEM_SEARCH_TAG_SECONDARY + ", "
+                + ItemSearchColumns.ITEM_SEARCH_STARRED + ") VALUES (new.rowid, "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_DESCRIPTION + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_DATE_UPDATED + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_TAG_PRIMARY + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_TAG_SECONDARY + ", "
+                + "new." + ItemSearchColumns.ITEM_SEARCH_STARRED + ");END;");
 
         // add the tags
         db.beginTransaction();
         ContentValues values = new ContentValues();
         for (int i = 0; i < tags.length; i++) {
-            values.put(TAG_NAME, tags[i]);
-            values.put(TAG_ACE_MODE, tagAceModes[i]);
-            values.put(TAG_COLOR, tagColors[i]);
-            db.insert(TAG_TABLE, null, values);
+            values.put(TagColumns.TAG_NAME, tags[i]);
+            values.put(TagColumns.TAG_ACE_MODE, tagAceModes[i]);
+            values.put(TagColumns.TAG_COLOR, tagColors[i]);
+            db.insert(Tables.TAG, null, values);
         }
         db.setTransactionSuccessful();
         db.endTransaction();
@@ -137,14 +137,13 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DROP_ITEM);
-        db.execSQL(SQL_DROP_TAG);
-        db.execSQL(SQL_DROP_ITEM_SEARCH);
-        db.execSQL(SQL_DROP_TAG_INDEX);
-        db.execSQL(SQL_DROP_TRIGGER_SEARCH_BU);
-        db.execSQL(SQL_DROP_TRIGGER_SEARCH_BD);
-        db.execSQL(SQL_DROP_TRIGGER_SEARCH_AU);
-        db.execSQL(SQL_DROP_TRIGGER_SEARCH_AI);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.ITEM);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.TAG);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.ITEM_SEARCH);
+        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_BU);
+        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_BD);
+        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_AU);
+        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_AI);
         onCreate(db);
     }
 
