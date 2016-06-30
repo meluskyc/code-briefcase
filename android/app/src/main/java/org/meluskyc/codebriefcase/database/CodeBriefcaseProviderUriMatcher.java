@@ -4,6 +4,14 @@ import android.content.UriMatcher;
 import android.net.Uri;
 import android.util.SparseArray;
 
+/**
+ * Provides methods to match a {@link android.net.Uri} to a {@link CodeBriefcaseUriEnum}.
+ * <p />
+ * All methods are thread safe, except {@link #buildUriMatcher()} and {@link #buildEnumsMap()},
+ * which is why they are called only from the constructor.
+ *
+ * based on Google I/O 2015 app at https://git.io/vKYuK
+ */
 public class CodeBriefcaseProviderUriMatcher {
     /**
      * All methods on a {@link UriMatcher} are thread safe, except {@code addURI}.

@@ -17,6 +17,11 @@ import org.meluskyc.codebriefcase.utils.SelectionBuilder;
 
 
 @SuppressWarnings("ConstantConditions")
+/**
+ * {@link ContentProvider} class to access {@link CodeBriefcaseContract} data.
+ *
+ * based on Google I/O 2015 app at https://git.io/vKYuK
+ */
 public class CodeBriefcaseProvider extends ContentProvider {
 
     private CodeBriefcaseDatabase dbHelper;
@@ -137,6 +142,11 @@ public class CodeBriefcaseProvider extends ContentProvider {
         return uriEnum.contentType;
     }
 
+    /**
+     * Utility method to return a new SelectionBuilder based on the requested {@link Uri}
+     * @param uri
+     * @return
+     */
     private SelectionBuilder buildSelection(Uri uri) {
         final SelectionBuilder builder = new SelectionBuilder();
         CodeBriefcaseUriEnum uriEnum = uriMatcher.matchUri(uri);

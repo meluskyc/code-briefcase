@@ -31,7 +31,14 @@ import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
-
+/**
+ * Servlets that support a simple REST API for the web interface.
+ *
+ * The web interface is inaccessible until an {@link AlertDialog}
+ * with the requesting IP address is accepted. Future requests from
+ * that IP will be served the webapp until the app is closed
+ * or the user disconnects from {@link org.meluskyc.codebriefcase.activity.WebActivity}.
+ */
 public class AppServlets extends AppRouter {
 
     private static final String LOG_TAG = "AppServlets";
@@ -477,7 +484,13 @@ public class AppServlets extends AppRouter {
         addRoute("/(.)*", StaticHandler.class);
     }
 
-
+    /**
+     * Show an {@link AlertDialog} that prompts the user to
+     * accept a connection to the web app.
+     *
+     * @param session
+     * @return
+     */
     public synchronized Response showIncomingAlert(final IHTTPSession session) {
         if (TextUtils.isEmpty(clientIpAddress)) {
             final Handler handler = new Handler(Looper.getMainLooper());

@@ -9,6 +9,11 @@ import org.meluskyc.codebriefcase.R;
 import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.ItemColumns;
 import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.TagColumns;
 
+/**
+ * {@link SQLiteOpenHelper} class for {@link CodeBriefcaseProvider}.
+ *
+ * based on Google I/O 2015 app at https://git.io/vKYuK
+ */
 public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "codebriefcase.db";

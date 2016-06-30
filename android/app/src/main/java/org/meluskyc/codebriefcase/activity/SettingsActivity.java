@@ -7,6 +7,9 @@ import android.support.v7.widget.Toolbar;
 
 import org.meluskyc.codebriefcase.R;
 
+/**
+ * Simple settings activity based on a PreferenceFragment.
+ */
 public class SettingsActivity extends BaseActivity {
 
     @Override
@@ -24,8 +27,6 @@ public class SettingsActivity extends BaseActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
-            // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences);
         }
     }

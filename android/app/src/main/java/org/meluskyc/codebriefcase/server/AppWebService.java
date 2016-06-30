@@ -14,6 +14,10 @@ import org.meluskyc.codebriefcase.utils.AppUtils;
 
 import java.io.IOException;
 
+/**
+ * {@link Service} class to manage starting and stopping the web
+ * server.
+ */
 public class AppWebService extends Service {
 
     private static final String ACTION_START = "org.meluskyc.codebriefcase.START";
@@ -49,6 +53,9 @@ public class AppWebService extends Service {
         return START_STICKY;
     }
 
+    /**
+     * Disconnect from the current client.
+     */
     private void disconnect() {
         if (server != null) {
             server.setClientIpAddress("");
@@ -62,6 +69,9 @@ public class AppWebService extends Service {
         stop();
     }
 
+    /**
+     * Start the web server.
+     */
     private void start() {
         if (server == null || !server.isAlive()) {
             try {
@@ -75,6 +85,9 @@ public class AppWebService extends Service {
         }
     }
 
+    /**
+     * Broadcast an {@link Intent} with the server's status.
+     */
     private void status() {
         Intent statusIntent = new Intent("org.meluskyc.codebriefcase.STATUS_UPDATE");
         int ip = ((WifiManager) getSystemService(WIFI_SERVICE)).getConnectionInfo().getIpAddress();
@@ -93,6 +106,9 @@ public class AppWebService extends Service {
         sendBroadcast(statusIntent);
     }
 
+    /**
+     * Stop the web server and broadcast the status.
+     */
     private void stop() {
         if (server != null && server.isAlive()) {
             server.stop();
@@ -102,24 +118,42 @@ public class AppWebService extends Service {
         stopSelf();
     }
 
+    /**
+     * Start the {@link Service} with an {@link Intent} to start the web server.
+     * @param context
+     */
     public static void start(Context context) {
         Intent intent = new Intent(context, AppWebService.class);
         intent.setAction(ACTION_START);
         context.startService(intent);
     }
 
+    /**
+     * Start the {@link Service} with an {@link Intent} to stop the web server.
+     * @param context
+     */
     public static void stop(Context context) {
         Intent intent = new Intent(context, AppWebService.class);
         intent.setAction(ACTION_STOP);
         context.startService(intent);
     }
 
+    /**
+     * Start the {@link Service} with an {@link Intent} to disconnect from the
+     * connected client.
+     * @param context
+     */
     public static void disconnect(Context context) {
         Intent intent = new Intent(context, AppWebService.class);
         intent.setAction(ACTION_DISCONNECT);
         context.startService(intent);
     }
 
+    /**
+     * Start the {@link Service} with an {@link Intent} to broadcast the
+     * server's status
+     * @param context
+     */
     public static void status(Context context) {
         Intent intent = new Intent(context, AppWebService.class);
         intent.setAction(ACTION_STATUS);

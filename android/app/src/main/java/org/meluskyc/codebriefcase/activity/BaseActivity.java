@@ -15,12 +15,19 @@ import org.meluskyc.codebriefcase.server.AppWebService;
 
 public class BaseActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    /**
+     * BroadcastReceiver to manage starting and stopping AppWebService.
+     * -start when the device has a valid IP address
+     * -stop otherwise
+     */
+    private WifiReceiver wifiReceiver;
     private class WifiReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (((WifiManager) context.getSystemService(context.WIFI_SERVICE))
                     .getConnectionInfo()
                     .getIpAddress() != 0) {
+
                 AppWebService.start(context);
             }
             else {
@@ -28,8 +35,6 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
             }
         }
     }
-
-    private WifiReceiver wifiReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +87,9 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
         unregisterWifiReceiver();
     }
 
+    /**
+     * Create and register a new WifiReceiver.
+     */
     protected void registerWifiReceiver() {
         if (wifiReceiver == null) {
             wifiReceiver = new WifiReceiver();
@@ -90,6 +98,9 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
+    /**
+     * Unregister the WifiReceiver and set to null.
+     */
     protected void unregisterWifiReceiver() {
         if (wifiReceiver != null) {
             unregisterReceiver(wifiReceiver);

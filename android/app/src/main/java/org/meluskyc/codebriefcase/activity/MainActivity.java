@@ -46,23 +46,27 @@ import java.util.HashMap;
 public class MainActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SearchView.OnQueryTextListener {
 
+    // loader IDs
+    private final int ITEMS_LOADER = 1;
+    private final int TAGS_LOADER = 2;
+
+    // no list filter
     private final int FILTER_NONE = -1;
+
+    // list filter starred
     private final int FILTER_STARRED = -2;
 
-    private SimpleCursorAdapter itemsAdapter;
-    private ListView itemsList;
-    private final int ITEMS_LOADER = 1;
-    private String searchQuery = "";
     private long filter = FILTER_NONE;
-    private SearchView searchView;
 
+    private SearchView searchView;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-    private final int TAGS_LOADER = 2;
-    private final int FILTER_GROUP = -1;
+    private ListView itemsList;
+    private SimpleCursorAdapter itemsAdapter;
+    private String searchQuery;
 
-    // store tag IDs for each tag filter
+    // store tag ID for each tag filter
     private HashMap<String, Long> filterIdsMap;
 
     @Override
@@ -70,12 +74,13 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         super.onCreate(savedInstanceState);
         filterIdsMap = new HashMap<>();
+        searchQuery = "";
         setContentView(R.layout.activity_main);
 
         setupFab();
         setupToolbar();
         setupDrawer();
-        setupItemsView();
+        setupListView();
 
         LoaderManager loaderManager = getLoaderManager();
         loaderManager.initLoader(ITEMS_LOADER, null, this);
@@ -86,6 +91,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         }
     }
 
+    /**
+     * Sets up the floating action button.
+     */
     private void setupFab() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.main_fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -96,12 +104,19 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         });
     }
 
+    /**
+     * Sets up the toolbar.
+     */
     private void setupToolbar() {
         toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void setupItemsView() {
+    /**
+     * Sets up the list view.
+     */
+    private void setupListView() {
         itemsAdapter = new SimpleCursorAdapter(this, R.layout.item_main, null,
                 new String[]{Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
                         Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY, Tag.TAG_COLOR,
@@ -135,14 +150,15 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                             default:
                                 ((ImageView) view).setImageResource(R.drawable.ic_star_outline_24dp);
                                 view.setTag(0);
+                                break;
                         }
-                        final long rowid = cursor.getLong(cursor.getColumnIndex("_id"));
+                            final long itemId = cursor.getLong(cursor.getColumnIndex("_id"));
 
                         view.setOnClickListener(new View.OnClickListener() {
-                            long _rowid = rowid;
+                            long _itemId = itemId;
 
                             public void onClick(View v) {
-                                toggleImage(_rowid, (ImageView) v);
+                                toggleStarred(_itemId, (ImageView) v);
                             }
                         });
                         return true;
@@ -159,16 +175,17 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 startActivity(new Intent(MainActivity.this,
-                        AddEditActivity.class).putExtra("rowid", id));
+                        AddEditActivity.class).putExtra(AddEditActivity.INTENT_ITEMID, id));
             }
         });
     }
 
 
-
+    /**
+     * Sets up the navigation drawer. The navigation drawer contains static links
+     * to activities and a dynamically generated list of tag filters.
+     */
     private void setupDrawer() {
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationIcon(R.drawable.ic_drawer);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -263,7 +280,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 Menu menu = navigationView.getMenu();
                 menu.removeGroup(R.id.nav_filters);
                 SubMenu submenu = menu.addSubMenu(R.id.nav_filters, Menu.NONE, Menu.NONE, "Filter");
-                MenuItem itemStarred = submenu
+                submenu
                         .add("Starred")
                         .setIcon(R.drawable.ic_drawer_star)
                         .setCheckable(true);
@@ -287,9 +304,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         switch (loader.getId()) {
             case ITEMS_LOADER:
                 itemsAdapter.swapCursor(null);
-                break;
-            case TAGS_LOADER:
-                navigationView.getMenu().removeGroup(FILTER_GROUP);
                 break;
         }
 
@@ -342,28 +356,33 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         return true;
     }
 
-    private void toggleImage(long rowid, ImageView imageView) {
-        int newVal;
-        if (imageView.getTag().equals(0)) {
-            newVal = 1;
-            imageView.setImageResource(R.drawable.ic_star_24dp);
+    /**
+     * Star or unstar an item
+     * @param itemId the item's ID
+     * @param imageView the star icon of the item clicked
+     */
+    private void toggleStarred(long itemId, ImageView imageView) {
+        int tagValue = (int) imageView.getTag();
+        switch (tagValue) {
+            case 0: {
+                tagValue = 1;
+                imageView.setImageResource(R.drawable.ic_star_24dp);
+                break;
+            }
+            default: {
+                tagValue = 0;
+                imageView.setImageResource(R.drawable.ic_star_outline_24dp);
+                break;
+            }
         }
-        else if (imageView.getTag().equals(1)) {
-            newVal = 0;
-            imageView.setImageResource(R.drawable.ic_star_outline_24dp);
-        }
-        else {
-            newVal = 1;
-            imageView.setImageResource(R.drawable.ic_star_24dp);
-        }
-        imageView.setTag(newVal);
+        imageView.setTag(tagValue);
 
         ContentResolver cr = getContentResolver();
         ContentValues values = new ContentValues();
-        values.put(Item.ITEM_STARRED, newVal);
+        values.put(Item.ITEM_STARRED, tagValue);
 
         try {
-            cr.update(Item.buildItemUri(rowid), values, null, null);
+            cr.update(Item.buildItemUri(itemId), values, null, null);
         }
         catch (SQLException e) {
             Toast.makeText(this, "Error updating record.", Toast.LENGTH_LONG).show();

@@ -15,10 +15,16 @@ import org.meluskyc.codebriefcase.R;
 import org.meluskyc.codebriefcase.server.AppServlets;
 import org.meluskyc.codebriefcase.server.AppWebService;
 
+/**
+ * Activity to display information about the web interface.
+ */
 public class WebActivity extends BaseActivity {
 
-    private StatusReceiver statusReceiver;
 
+    /**
+     * BroadcastReceiver to display messages from AppWebService.
+     */
+    private StatusReceiver statusReceiver;
     private class StatusReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -99,6 +105,10 @@ public class WebActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Disconnect from the current client.
+     * @param view
+     */
     public void disconnect(View view) {
         AppWebService.disconnect(this);
     }
@@ -110,6 +120,9 @@ public class WebActivity extends BaseActivity {
         editor.commit();
     }
 
+    /**
+     * Create and register a new StatusReceiver.
+     */
     private void registerStatusReceiver() {
         if (statusReceiver == null) {
             statusReceiver = new StatusReceiver();
@@ -119,6 +132,9 @@ public class WebActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Unregister the StatusReceiver and set to null.
+     */
     private void unregisterStatusReceiver() {
         if (statusReceiver != null) {
             unregisterReceiver(statusReceiver);

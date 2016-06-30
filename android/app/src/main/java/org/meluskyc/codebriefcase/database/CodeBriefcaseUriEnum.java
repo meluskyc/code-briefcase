@@ -11,6 +11,8 @@ package org.meluskyc.codebriefcase.database;
  * {@code sessions / room / time}, then {@code speaker / room / time} will not match anything,
  * because the {@code UriMatcher} will follow the path of the first  and will fail at the third
  * segment.
+ *
+ * based on Google I/O 2015 app at https://git.io/vKYuK
  */
 public enum CodeBriefcaseUriEnum {
     ITEM(100, "item", CodeBriefcaseContract.Item.CONTENT_TYPE_ID, false,

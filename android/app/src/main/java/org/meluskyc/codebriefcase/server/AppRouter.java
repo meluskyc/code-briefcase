@@ -1,14 +1,6 @@
 package org.meluskyc.codebriefcase.server;
 
 /*
-    Changed private method addRoute() to process mappings in the order
-    they are added.
-
-    Otherwise parameter routes (e.g. /:id) will never be processed
-    before a wildcard (catch-all).
- */
-
-/*
  * #%L
  * NanoHttpd-Samples
  * %%
@@ -39,6 +31,13 @@ package org.meluskyc.codebriefcase.server;
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * #L%
+ */
+
+/*
+ * Modifications:
+ * -Imported from NanoHTTPD at https://git.io/vKYxK
+ * -Changed package name
+ * -Changed addRoute() to process mappings in-order
  */
 
 import java.io.BufferedInputStream;

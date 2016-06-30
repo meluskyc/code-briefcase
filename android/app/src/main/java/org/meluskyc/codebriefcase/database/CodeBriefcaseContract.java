@@ -4,6 +4,11 @@ import android.net.Uri;
 
 import org.meluskyc.codebriefcase.database.CodeBriefcaseDatabase.Tables;
 
+/**
+ * Contract class for interacting with {@link CodeBriefcaseProvider}.
+ *
+ * based on Google I/O 2015 app at https://git.io/vKYuK
+ */
 public final class CodeBriefcaseContract {
 
     private CodeBriefcaseContract() {}
