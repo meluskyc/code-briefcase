@@ -26,7 +26,7 @@ public class AppWebService extends Service {
     private static final String ACTION_DISCONNECT = "org.meluskyc.codebriefcase.DISCONNECT";
     public static final String STATUS_OFFLINE = "OFFLINE";
 
-    private AppServlets server;
+    private AppServer server;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -77,7 +77,7 @@ public class AppWebService extends Service {
             try {
                 AlertDialog.Builder incomingConnectionBuilder = new AlertDialog.Builder
                         (new ContextThemeWrapper(this, R.style.AppTheme_Dark));
-                server = new AppServlets(this, incomingConnectionBuilder);
+                server = new AppServer(this, incomingConnectionBuilder);
                 status();
             } catch (IOException e) {
                 Log.e("AppWebService", "Unable to start server.");

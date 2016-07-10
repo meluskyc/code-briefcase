@@ -1,10 +1,14 @@
 package org.meluskyc.codebriefcase.utils;
 
+import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -38,5 +42,32 @@ public class AppUtils {
 
     public static String formatQueryDistinctParameter(String parameter){
         return QUERY_PARAMETER_DISTINCT + " " + parameter;
+    }
+
+    // http://stackoverflow.com/questions/13070791/android-cursor-to-jsonarray
+    public static JSONArray cur2Json(Cursor cursor) {
+        JSONArray resultSet = new JSONArray();
+        cursor.moveToFirst();
+        while (cursor.isAfterLast() == false) {
+            final int totalColumn = cursor.getColumnCount();
+            JSONObject rowObject = new JSONObject();
+            int i;
+            for (  i = 0; i < totalColumn; i++) {
+                if (cursor.getColumnName(i) != null) {
+                    String getcol = cursor.getColumnName(i);
+                    String getstr = cursor.getString(i);
+
+                    try {
+                        rowObject.put(getcol, getstr);
+                    } catch (JSONException e) {
+                        Log.e("Server", "Unable to serialize cursor");
+                    }
+                }
+            }
+            resultSet.put(rowObject);
+            cursor.moveToNext();
+        }
+
+        return resultSet;
     }
 }

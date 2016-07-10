@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.server.AppServlets;
+import org.meluskyc.codebriefcase.server.AppServer;
 import org.meluskyc.codebriefcase.server.AppWebService;
 
 /**
@@ -38,7 +38,7 @@ public class WebActivity extends BaseActivity {
                 String clientIp = intent.getStringExtra("clientIp");
                 if (clientIp.equals("")) {
                     ((TextView) findViewById(R.id.web_text_help)).setText(getString(R.string.to_use_the_web,
-                            serverIp + ":" + AppServlets.PORT));
+                            serverIp + ":" + AppServer.PORT));
                     findViewById(R.id.web_btn_disconnect).setVisibility(View.INVISIBLE);
                 }
                 else {
