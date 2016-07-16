@@ -54,10 +54,10 @@ items.push(ten);
 items.push(eleven);
 
 router.route('/')
-  .get(function(req, res, next) {
+  .get(function (req, res) {
     res.json(items);
   })
-  .post(function(req, res, next) {
+  .post(function (req, res) {
     var item = {};
     item._id = items[items.length - 1]._id + 1;
     item.description = req.body.description;
@@ -72,27 +72,23 @@ router.route('/')
     res.json(item);
   });
 
+router.route('/tags')
+  .get(function (req, res) {
+    res.json(tags);
+  });
+
 router.route('/:_id')
-  .get(function(req, res, next) {
+  .get(function (req, res) {
     for (var i = 0; i < items.length; i++) {
-      if (items[i]._id === req.params._id) {
+      if (items[i]._id === Number(req.params._id)) {
         res.json(items[i]);
         break;
       }
     }
   })
-  .delete(function(req, res, next) {
+  .put(function (req, res) {
     for (var i = 0; i < items.length; i++) {
-      if (items[i]._id === req.params._id) {
-        items.splice(i, 1);
-        res.json(items[i]);
-        break;
-      }
-    }
-  })
-  .put(function(req, res, next) {
-    for (var i = 0; i < items.length; i++) {
-      if (items[i]._id === req.params._id) {
+      if (items[i]._id === Number(req.params._id)) {
         if (req.body.hasOwnProperty("description")) {
           items[i].description = req.body.description;
         }
@@ -112,12 +108,15 @@ router.route('/:_id')
         break;
       }
     }
+  })
+  .delete(function (req, res) {
+    for (var i = 0; i < items.length; i++) {
+      if (items[i]._id === Number(req.params._id)) {
+        items.splice(i, 1);
+        res.json(items[i]);
+        break;
+      }
+    }
   });
-
-router.route('/tags')
-  .get(function(req, res, next) {
-    res.json(tags);
-  });
-
 
 module.exports = router;
