@@ -17,6 +17,7 @@ import fi.iki.elonen.NanoHTTPD;
 public class SecurityHandler extends AppRouter.DefaultHandler {
     private static final String URI_CONNECT = "/connect";
     private static final String URI_CONNECT_IMAGE = "/assets/images/connect(.*).png";
+    private static final String REJECTED_IP = "reject";
 
     @Override
     public String getText() {
@@ -46,9 +47,9 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                         "application/json", "{ \"result\":\"reject\" }");
             }
         }
-        else if (uri.equals(URI_CONNECT_IMAGE)) {
+        else if (uri.matches(URI_CONNECT_IMAGE)) {
             return AppServer.serveStaticFile(AppServer.normalizeUri(
-                    AppServer.PATH_WEBROOT + session.getUri()), session);
+                    AppServer.PATH_WEBROOT + uri), session);
         }
         else {
             return AppServer.serveStaticFile(AppServer.PATH_CONNECT_PAGE, session);
@@ -88,7 +89,7 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                             .setNegativeButton(context.getString(R.string.reject), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AppServer.setClientIpAddress("reject");
+                                    AppServer.setClientIpAddress(REJECTED_IP);
                                     dialog.dismiss();
                                 }
                             });
@@ -100,7 +101,7 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                     final Runnable runnable = new Runnable() {
                         @Override
                         public void run() {
-                            AppServer.setClientIpAddress("reject");
+                            AppServer.setClientIpAddress(REJECTED_IP);
                             if (dialog.isShowing()) {
                                 dialog.dismiss();
                             }
@@ -119,8 +120,8 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                 }
             });
             while (TextUtils.isEmpty(AppServer.getClientIpAddress())) { }
-            if (AppServer.getClientIpAddress().equals("rejected")) {
-                AppServer.setClientIpAddress("");
+            if (AppServer.getClientIpAddress().equals(REJECTED_IP)) {
+                AppServer.setClientIpAddress(null);
                 return false;
             }
             else {
@@ -129,7 +130,7 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
             }
         }
         else {
-            AppServer.setClientIpAddress("");
+            AppServer.setClientIpAddress(null);
             return false;
         }
     }
