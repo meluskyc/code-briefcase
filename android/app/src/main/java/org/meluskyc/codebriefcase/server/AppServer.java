@@ -82,12 +82,10 @@ public class AppServer extends AppRouter {
     public Response serve(final IHTTPSession session) {
         if (session.getRemoteIpAddress().equals(clientIpAddress)) {
             return super.serve(session);
-        }
-        else {
+        } else {
             if (!TextUtils.isEmpty(clientIpAddress)) {
                 return new ErrorHandlers.Error401UriHandler().get(null, null, session);
-            }
-            else {
+            } else {
                 return new SecurityHandler().get(null, null, session);
             }
         }
@@ -99,8 +97,7 @@ public class AppServer extends AppRouter {
 
         try {
             inputStream = context.getAssets().open(uri);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return new AppRouter.Error404UriHandler().get(null, null, session);
         }
 

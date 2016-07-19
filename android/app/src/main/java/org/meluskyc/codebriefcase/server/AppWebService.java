@@ -39,14 +39,11 @@ public class AppWebService extends Service {
             final String action = intent.getAction();
             if (action.equals(ACTION_START)) {
                 start();
-            }
-            else if (action.equals(ACTION_STOP)) {
+            } else if (action.equals(ACTION_STOP)) {
                 stop();
-            }
-            else if (action.equals(ACTION_STATUS)) {
+            } else if (action.equals(ACTION_STATUS)) {
                 status();
-            }
-            else if (action.equals(ACTION_DISCONNECT)) {
+            } else if (action.equals(ACTION_DISCONNECT)) {
                 disconnect();
             }
         }
@@ -93,14 +90,12 @@ public class AppWebService extends Service {
         int ip = ((WifiManager) getSystemService(WIFI_SERVICE)).getConnectionInfo().getIpAddress();
         if (ip != 0) {
             statusIntent.putExtra("serverIp", AppUtils.formatIpAddress(ip));
-        }
-        else {
+        } else {
             statusIntent.putExtra("serverIp", STATUS_OFFLINE);
         }
         if (server != null) {
             statusIntent.putExtra("clientIp", server.getClientIpAddress());
-        }
-        else {
+        } else {
             statusIntent.putExtra("clientIp", "");
         }
         sendBroadcast(statusIntent);

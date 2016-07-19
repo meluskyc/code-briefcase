@@ -41,17 +41,14 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
             if (showIncomingAlert(session)) {
                 return NanoHTTPD.newFixedLengthResponse(getStatus(),
                         "application/json", "{ \"result\":\"accept\" }");
-            }
-            else {
+            } else {
                 return NanoHTTPD.newFixedLengthResponse(getStatus(),
                         "application/json", "{ \"result\":\"reject\" }");
             }
-        }
-        else if (uri.matches(URI_CONNECT_IMAGE)) {
+        } else if (uri.matches(URI_CONNECT_IMAGE)) {
             return AppServer.serveStaticFile(AppServer.normalizeUri(
                     AppServer.PATH_WEBROOT + uri), session);
-        }
-        else {
+        } else {
             return AppServer.serveStaticFile(AppServer.PATH_CONNECT_PAGE, session);
         }
     }
@@ -123,13 +120,11 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
             if (AppServer.getClientIpAddress().equals(REJECTED_IP)) {
                 AppServer.setClientIpAddress(null);
                 return false;
-            }
-            else {
+            } else {
                 AppWebService.status(context);
                 return true;
             }
-        }
-        else {
+        } else {
             AppServer.setClientIpAddress(null);
             return false;
         }

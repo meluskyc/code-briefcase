@@ -52,8 +52,7 @@ public class AddEditActivity extends BaseActivity {
                 this.setTitle(getString(R.string.add_a_snippet));
                 Toast.makeText(this, getString(R.string.unable_to_retrieve), Toast.LENGTH_LONG).show();
                 itemId = null;
-            }
-            else {
+            } else {
                 this.setTitle(getString(R.string.edit_a_snippet));
 
                 ((EditText) findViewById(R.id.addedit_edit_description)).setText(c.getString(0));
@@ -71,13 +70,11 @@ public class AddEditActivity extends BaseActivity {
                 ((EditText) findViewById(R.id.addedit_edit_content)).setText(c.getString(3));
             }
             c.close();
-        }
-        else if (intent.hasExtra(Intent.EXTRA_TEXT)) {
+        } else if (intent.hasExtra(Intent.EXTRA_TEXT)) {
             this.setTitle(getString(R.string.add_a_snippet));
             ((EditText) findViewById(R.id.addedit_edit_content))
                     .setText(intent.getStringExtra(Intent.EXTRA_TEXT));
-        }
-        else {
+        } else {
             this.setTitle(getString(R.string.add_a_snippet));
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
@@ -89,8 +86,7 @@ public class AddEditActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         if (itemId == null) {
             getMenuInflater().inflate(R.menu.menu_add, menu);
-        }
-        else {
+        } else {
             getMenuInflater().inflate(R.menu.menu_edit, menu);
         }
 
@@ -121,8 +117,7 @@ public class AddEditActivity extends BaseActivity {
             args.putLong(INTENT_ITEMID, itemId);
             confirmDialog.setArguments(args);
             confirmDialog.show(getFragmentManager(), "deletionConfirmation");
-        }
-        else {
+        } else {
             finish();
         }
     }

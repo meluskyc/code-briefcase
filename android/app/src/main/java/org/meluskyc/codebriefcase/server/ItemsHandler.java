@@ -70,8 +70,7 @@ public class ItemsHandler extends AppRouter.DefaultHandler {
                 long id;
                 try {
                     id = Long.parseLong(urlParams.get("_id"));
-                }
-                catch(NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                             "text/plain", null);
                 }
@@ -115,8 +114,7 @@ public class ItemsHandler extends AppRouter.DefaultHandler {
                 long id;
                 try {
                     id = Long.parseLong(urlParams.get("_id"));
-                }
-                catch(NumberFormatException e) {
+                } catch(NumberFormatException e) {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
                             "text/plain", null);
                 }
@@ -131,8 +129,7 @@ public class ItemsHandler extends AppRouter.DefaultHandler {
                     } catch (JSONException e) {
                         Log.e(LOG_TAG, "Unable to parse JSON: " + e.getMessage());
                     }
-                }
-                else {
+                } else {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
                             "text/plain", null);
                 }
@@ -227,8 +224,7 @@ public class ItemsHandler extends AppRouter.DefaultHandler {
 
                     if (item.has(CodeBriefcaseContract.Item.ITEM_STARRED)) {
                         values.put(CodeBriefcaseContract.Item.ITEM_STARRED, item.getString(CodeBriefcaseContract.Item.ITEM_STARRED));
-                    }
-                    else if (item.has(CodeBriefcaseContract.Item.ITEM_CONTENT)) {
+                    } else if (item.has(CodeBriefcaseContract.Item.ITEM_CONTENT)) {
                         values.put(CodeBriefcaseContract.Item.ITEM_CONTENT, item.getString(CodeBriefcaseContract.Item.ITEM_CONTENT));
                         values.put(CodeBriefcaseContract.Item.ITEM_DESCRIPTION, item.getString(CodeBriefcaseContract.Item.ITEM_DESCRIPTION));
                         values.put(CodeBriefcaseContract.Item.ITEM_TAG_PRIMARY, item.getString(CodeBriefcaseContract.Item.ITEM_TAG_PRIMARY));

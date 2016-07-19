@@ -29,8 +29,7 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
                     .getIpAddress() != 0) {
 
                 AppWebService.start(context);
-            }
-            else {
+            } else {
                 AppWebService.stop(context);
             }
         }
@@ -43,8 +42,7 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
         if (sharedPreferences.getString(getString(R.string.pref_theme_key),
                 getString(R.string.pref_theme_default)).equals("default")) {
             setTheme(R.style.AppTheme_Default);
-        }
-        else {
+        } else {
             setTheme(R.style.AppTheme_Dark);
         }
         super.onCreate(savedInstanceState);
@@ -59,8 +57,7 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
             if (!sharedPreferences.getBoolean(getString(R.string.pref_offline_mode_key), false)) {
                 registerWifiReceiver();
                 AppWebService.start(this);
-            }
-            else {
+            } else {
                 unregisterWifiReceiver();
                 AppWebService.stop(this);
             }

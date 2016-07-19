@@ -33,15 +33,13 @@ public class WebActivity extends BaseActivity {
             if (serverIp.equals(AppWebService.STATUS_OFFLINE)) {
                 ((TextView) findViewById(R.id.web_text_help)).setText(R.string.to_enable_the_web);
                 findViewById(R.id.web_btn_disconnect).setVisibility(View.INVISIBLE);
-            }
-            else {
+            } else {
                 String clientIp = intent.getStringExtra("clientIp");
                 if (clientIp.equals("")) {
                     ((TextView) findViewById(R.id.web_text_help)).setText(getString(R.string.to_use_the_web,
                             serverIp + ":" + AppServer.PORT));
                     findViewById(R.id.web_btn_disconnect).setVisibility(View.INVISIBLE);
-                }
-                else {
+                } else {
                     ((TextView) findViewById(R.id.web_text_help)).setText(getString(R.string.connected_to_ip, clientIp));
                     findViewById(R.id.web_btn_disconnect).setVisibility(View.VISIBLE);
                 }
@@ -69,8 +67,7 @@ public class WebActivity extends BaseActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.getBoolean(getString(R.string.pref_offline_mode_key), false)) {
             registerStatusReceiver();
-        }
-        else {
+        } else {
             ((TextView)findViewById(R.id.web_text_help)).setText(R.string.offline_mode_is_on);
             findViewById(R.id.web_text_disable_offline).setVisibility(View.VISIBLE);
         }
@@ -94,8 +91,7 @@ public class WebActivity extends BaseActivity {
                 registerStatusReceiver();
                 findViewById(R.id.web_text_disable_offline).setVisibility(View.GONE);
                 AppWebService.start(this);
-            }
-            else {
+            } else {
                 unregisterWifiReceiver();
                 unregisterStatusReceiver();
                 ((TextView)findViewById(R.id.web_text_help)).setText(R.string.offline_mode_is_on);

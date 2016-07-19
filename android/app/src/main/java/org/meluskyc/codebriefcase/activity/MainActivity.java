@@ -162,8 +162,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                             }
                         });
                         return true;
+                    default:
+                        return false;
                 }
-                return false;
             }
         });
 
@@ -242,8 +243,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                     final Uri uri;
                     if (filter == FILTER_STARRED) {
                         uri = Item.buildStarredUri();
-                    }
-                    else {
+                    } else {
                         uri = Item.buildTagDirUri(filter);
                     }
                     return new CursorLoader(this, uri, new String[]{Qualified.ITEM_ID,
@@ -251,8 +251,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                         Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY,
                         Tag.TAG_COLOR, Item.ITEM_STARRED}, null, null,
                             Item.ITEM_DATE_UPDATED + " DESC");
-                }
-                else {
+                } else {
                     return new CursorLoader(this, Item.buildSearchUri(searchQuery),
                             new String[]{ItemSearch.ITEM_SEARCH_DOCID + " AS _id",
                             Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
@@ -265,8 +264,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                         new String[]{AppUtils.formatQueryDistinctParameter(Qualified.TAG_ID),
                                 Item.ITEM_TAG_PRIMARY}, null, null,
                         Item.ITEM_TAG_PRIMARY + " COLLATE NOCASE ASC");
+            default:
+                return null;
         }
-        return null;
     }
 
     @Override
@@ -296,6 +296,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 submenu.setGroupCheckable(R.id.nav_filters, true, true);
 
                 break;
+            default:
+                break;
         }
     }
 
@@ -304,6 +306,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         switch (loader.getId()) {
             case ITEMS_LOADER:
                 itemsAdapter.swapCursor(null);
+                break;
+            default:
                 break;
         }
 
@@ -368,8 +372,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 tagValue = 1;
                 imageView.setImageResource(R.drawable.ic_star_24dp);
                 break;
-            }
-            default: {
+            } default: {
                 tagValue = 0;
                 imageView.setImageResource(R.drawable.ic_star_outline_24dp);
                 break;
@@ -383,8 +386,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         try {
             cr.update(Item.buildItemUri(itemId), values, null, null);
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             Toast.makeText(this, "Error updating record.", Toast.LENGTH_LONG).show();
         }
     }
