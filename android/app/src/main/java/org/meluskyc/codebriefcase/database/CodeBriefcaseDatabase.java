@@ -29,6 +29,10 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
                 "ON item_search.tag_primary = tag.name";
     }
 
+    private interface Indices {
+        String INDEX_TAG_NAME = "ix_tag_name";
+    }
+
     private interface Triggers {
         // Deletes from dependent tables when corresponding sessions are deleted.
         String ITEM_SEARCH_BU = "item_search_bu";
@@ -90,6 +94,9 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
                 + ItemSearchColumns.ITEM_SEARCH_TAG_PRIMARY + ", "
                 + ItemSearchColumns.ITEM_SEARCH_TAG_SECONDARY + ", "
                 + ItemSearchColumns.ITEM_SEARCH_STARRED + ")");
+
+        db.execSQL("CREATE INDEX " + Indices.INDEX_TAG_NAME + " ON "
+                + Tables.TAG + "(" + TagColumns.TAG_NAME + ");");
 
         db.execSQL("CREATE TRIGGER " + Triggers.ITEM_SEARCH_BU + " BEFORE UPDATE ON "
                 + Tables.ITEM + " BEGIN DELETE FROM " + Tables.ITEM_SEARCH
