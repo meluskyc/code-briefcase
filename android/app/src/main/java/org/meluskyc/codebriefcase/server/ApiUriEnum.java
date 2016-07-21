@@ -3,7 +3,7 @@ package org.meluskyc.codebriefcase.server;
 /**
  * URIs recognized by REST API
  */
-public enum AppApiUriEnum {
+public enum ApiUriEnum {
     // all items
     ITEMS("/api/items"),
 
@@ -18,7 +18,7 @@ public enum AppApiUriEnum {
 
     public String path;
 
-    AppApiUriEnum(String path) {
+    ApiUriEnum(String path) {
         this.path = path;
     }
 }

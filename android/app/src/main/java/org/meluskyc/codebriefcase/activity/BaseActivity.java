@@ -11,12 +11,13 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.server.AppWebService;
+import org.meluskyc.codebriefcase.server.WebService;
 
-public class BaseActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class BaseActivity extends AppCompatActivity
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     /**
-     * BroadcastReceiver to manage starting and stopping AppWebService.
+     * {@code BroadcastReceiver} to manage starting and stopping WebService.
      * -start when the device has a valid IP address
      * -stop otherwise
      */
@@ -27,10 +28,9 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
             if (((WifiManager) context.getSystemService(context.WIFI_SERVICE))
                     .getConnectionInfo()
                     .getIpAddress() != 0) {
-
-                AppWebService.start(context);
+                WebService.start(context);
             } else {
-                AppWebService.stop(context);
+                WebService.stop(context);
             }
         }
     }
@@ -54,12 +54,12 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
             recreate();
         }
         if (key.equals(getString(R.string.pref_offline_mode_key))) {
-            if (!sharedPreferences.getBoolean(getString(R.string.pref_offline_mode_key), false)) {
-                registerWifiReceiver();
-                AppWebService.start(this);
-            } else {
+            if (sharedPreferences.getBoolean(getString(R.string.pref_offline_mode_key), false)) {
                 unregisterWifiReceiver();
-                AppWebService.stop(this);
+                WebService.stop(this);
+            } else {
+                registerWifiReceiver();
+                WebService.start(this);
             }
         }
     }
@@ -85,7 +85,7 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
     }
 
     /**
-     * Create and register a new WifiReceiver.
+     * Create and register a new {@code WifiReceiver}.
      */
     protected void registerWifiReceiver() {
         if (wifiReceiver == null) {
@@ -96,7 +96,7 @@ public class BaseActivity extends AppCompatActivity implements SharedPreferences
     }
 
     /**
-     * Unregister the WifiReceiver and set to null.
+     * Unregister the {@code WifiReceiver} and set to null.
      */
     protected void unregisterWifiReceiver() {
         if (wifiReceiver != null) {

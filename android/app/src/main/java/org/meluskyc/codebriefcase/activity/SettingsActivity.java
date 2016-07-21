@@ -8,7 +8,7 @@ import android.support.v7.widget.Toolbar;
 import org.meluskyc.codebriefcase.R;
 
 /**
- * Simple settings activity based on a PreferenceFragment.
+ * Simple settings activity based on a {@code PreferenceFragment}.
  */
 public class SettingsActivity extends BaseActivity {
 

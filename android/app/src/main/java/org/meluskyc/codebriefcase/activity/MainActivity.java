@@ -46,28 +46,51 @@ import java.util.HashMap;
 public class MainActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SearchView.OnQueryTextListener {
 
-    // loader IDs
+    /**
+     * Open {@link AddEditActivity} with an item's ID
+     */
+    public static final String EXTRA_ITEM_ID = "itemId";
+
+    /**
+     * {@code SearchView} search text
+     */
+    public static final String EXTRA_SEARCH_QUERY = "searchQuery";
+    private String searchQuery;
+
+    /**
+     * Loader IDs
+     */
     private final int ITEMS_LOADER = 1;
     private final int TAGS_LOADER = 2;
 
-    // no list filter
+    /**
+     * No filter on {@code ListView}
+     */
     private final int FILTER_NONE = -1;
 
-    // list filter starred
+    /**
+     * {@code ListView} filter starred
+     */
     private final int FILTER_STARRED = -2;
 
+    /**
+     * {@code ListView} filter. Initialize to none.
+     */
     private long filter = FILTER_NONE;
 
-    private SearchView searchView;
+    /**
+     * Adapter for the {@code ListView}
+     */
+    private SimpleCursorAdapter itemsAdapter;
+
+    /**
+     * store the tag ID for each tag filter
+     */
+    private HashMap<String, Long> filterIdsMap;
+
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
-    private ListView itemsList;
-    private SimpleCursorAdapter itemsAdapter;
-    private String searchQuery;
-
-    // store tag ID for each tag filter
-    private HashMap<String, Long> filterIdsMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +110,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         loaderManager.initLoader(TAGS_LOADER, null, this);
 
         if (savedInstanceState != null) {
-            searchQuery = savedInstanceState.getString("searchQuery");
+            searchQuery = savedInstanceState.getString(EXTRA_SEARCH_QUERY);
         }
     }
 
@@ -117,20 +140,25 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
      * Sets up the list view.
      */
     private void setupListView() {
+        ListView itemsList = (ListView) findViewById(R.id.main_list_items);
         itemsAdapter = new SimpleCursorAdapter(this, R.layout.item_main, null,
                 new String[]{Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
                         Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY, Tag.TAG_COLOR,
                         Item.ITEM_STARRED},
-                new int[] {R.id.main_text_tag_primary, R.id.main_text_description, R.id.main_text_date_updated,
-                        R.id.main_text_tag_secondary, SimpleCursorAdapter.NO_SELECTION, R.id.main_image_starred}, 0);
+                new int[] {R.id.main_text_tag_primary, R.id.main_text_description,
+                        R.id.main_text_date_updated,
+                        R.id.main_text_tag_secondary, SimpleCursorAdapter.NO_SELECTION,
+                        R.id.main_image_starred}, 0);
 
         itemsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 
                 switch (columnIndex) {
                     case 1:
-                        view.setBackgroundColor(Color.parseColor(cursor.getString(cursor.getColumnIndex(Tag.TAG_COLOR))));
-                        ((TextView) view).setText(cursor.getString(cursor.getColumnIndex(Item.ITEM_TAG_PRIMARY)));
+                        view.setBackgroundColor(Color.parseColor(cursor.getString(
+                                cursor.getColumnIndex(Tag.TAG_COLOR))));
+                        ((TextView) view).setText(cursor.getString(
+                                cursor.getColumnIndex(Item.ITEM_TAG_PRIMARY)));
                         return true;
                     case 3:
                         long dateLong = cursor.getLong(cursor.getColumnIndex(Item.ITEM_DATE_UPDATED));
@@ -140,19 +168,22 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                     case 6:
                         switch (cursor.getInt(cursor.getColumnIndex(Item.ITEM_STARRED))) {
                             case 0:
-                                ((ImageView) view).setImageResource(R.drawable.ic_star_outline_24dp);
+                                ((ImageView) view).setImageResource(
+                                        R.drawable.ic_star_outline_24dp);
                                 view.setTag(0);
                                 break;
                             case 1:
-                                ((ImageView) view).setImageResource(R.drawable.ic_star_24dp);
+                                ((ImageView) view).setImageResource(
+                                        R.drawable.ic_star_24dp);
                                 view.setTag(1);
                                 break;
                             default:
-                                ((ImageView) view).setImageResource(R.drawable.ic_star_outline_24dp);
+                                ((ImageView) view).setImageResource(
+                                        R.drawable.ic_star_outline_24dp);
                                 view.setTag(0);
                                 break;
                         }
-                            final long itemId = cursor.getLong(cursor.getColumnIndex("_id"));
+                        final long itemId = cursor.getLong(cursor.getColumnIndex("_id"));
 
                         view.setOnClickListener(new View.OnClickListener() {
                             long _itemId = itemId;
@@ -168,7 +199,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             }
         });
 
-        itemsList = (ListView) findViewById(R.id.main_list_items);
         itemsList.setAdapter(itemsAdapter);
         itemsList.setTextFilterEnabled(true);
 
@@ -176,7 +206,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 startActivity(new Intent(MainActivity.this,
-                        AddEditActivity.class).putExtra(AddEditActivity.INTENT_ITEMID, id));
+                        AddEditActivity.class).putExtra(EXTRA_ITEM_ID, id));
             }
         });
     }
@@ -211,11 +241,13 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                                 break;
                             case R.id.nav_add:
                                 menuItem.setChecked(false);
-                                startActivity(new Intent(MainActivity.this, AddEditActivity.class));
+                                startActivity(new Intent(MainActivity.this,
+                                        AddEditActivity.class));
                                 break;
                             case R.id.nav_settings:
                                 menuItem.setChecked(false);
-                                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                                startActivity(new Intent(MainActivity.this,
+                                        SettingsActivity.class));
                                 break;
                             default:
                                 if (filter == filterIdsMap.get(menuItem.toString())) {
@@ -225,7 +257,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                                     filter = filterIdsMap.get(menuItem.toString());
                                 }
 
-                                getLoaderManager().restartLoader(ITEMS_LOADER, null, MainActivity.this);
+                                getLoaderManager().restartLoader(ITEMS_LOADER, null,
+                                        MainActivity.this);
                                 break;
                         }
 
@@ -279,12 +312,13 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 filterIdsMap.clear();
                 Menu menu = navigationView.getMenu();
                 menu.removeGroup(R.id.nav_filters);
-                SubMenu submenu = menu.addSubMenu(R.id.nav_filters, Menu.NONE, Menu.NONE, "Filter");
+                SubMenu submenu = menu.addSubMenu(R.id.nav_filters, Menu.NONE, Menu.NONE,
+                        getString(R.string.Filter));
                 submenu
-                        .add("Starred")
+                        .add(getString(R.string.starred))
                         .setIcon(R.drawable.ic_drawer_star)
                         .setCheckable(true);
-                filterIdsMap.put("Starred", (long) FILTER_STARRED);
+                filterIdsMap.put(getString(R.string.starred), (long) FILTER_STARRED);
                 while (cursor.moveToNext()) {
                     MenuItem newItem = submenu
                             .add(cursor.getString(cursor.getColumnIndex(Item.ITEM_TAG_PRIMARY)))
@@ -316,15 +350,15 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     public void onResume() {
         super.onResume();
-
-        getLoaderManager().restartLoader(ITEMS_LOADER, null, this);
-        getLoaderManager().restartLoader(TAGS_LOADER, null, this);
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.restartLoader(ITEMS_LOADER, null, this);
+        loaderManager.restartLoader(TAGS_LOADER, null, this);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle);
-        bundle.putString("searchQuery", searchQuery);
+        bundle.putString(EXTRA_SEARCH_QUERY, searchQuery);
     }
 
     @Override
@@ -333,7 +367,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView =
+        SearchView searchView =
                 (SearchView) menu.findItem(R.id.main_menu_search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
@@ -366,6 +400,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
      * @param imageView the star icon of the item clicked
      */
     private void toggleStarred(long itemId, ImageView imageView) {
+        ContentResolver cr = getContentResolver();
+        ContentValues values = new ContentValues();
         int tagValue = (int) imageView.getTag();
         switch (tagValue) {
             case 0: {
@@ -379,9 +415,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             }
         }
         imageView.setTag(tagValue);
-
-        ContentResolver cr = getContentResolver();
-        ContentValues values = new ContentValues();
         values.put(Item.ITEM_STARRED, tagValue);
 
         try {

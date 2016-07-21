@@ -57,7 +57,7 @@
         </activity>
 
         <service
-            android:name=".server.AppWebService"
+            android:name=".server.WebService"
             android:enabled="true"
             android:exported="true" />
 

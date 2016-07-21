@@ -152,6 +152,7 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + Tables.ITEM);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.TAG);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.ITEM_SEARCH);
+        db.execSQL("DROP INDEX IF EXISTS " + Indices.INDEX_TAG_NAME);
         db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_BU);
         db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_BD);
         db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_AU);

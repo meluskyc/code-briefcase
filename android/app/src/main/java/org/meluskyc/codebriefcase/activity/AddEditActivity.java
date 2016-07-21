@@ -23,16 +23,17 @@ import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Item;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+;
+
 /**
- * Activity to add a new item or display an existing item for edit.
- * Launched via an {@link Intent} {@link AddEditActivity#INTENT_ITEMID}
- * with the ID of the item to edit.
+ * Add a new item or display an existing item for edit. Launched via an {@code Intent}
+ * with an extra {@link MainActivity#EXTRA_ITEM_ID} as the ID of the item to edit.
  */
 public class AddEditActivity extends BaseActivity {
 
-    public static final String INTENT_ITEMID = "itemId";
-
-    // the item's ID
+    /**
+     * The item's ID
+     */
     private Long itemId;
 
     @Override
@@ -40,8 +41,8 @@ public class AddEditActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_edit);
         Intent intent = getIntent();
-        if (intent.hasExtra(INTENT_ITEMID)) {
-            itemId = getIntent().getLongExtra(INTENT_ITEMID, 0);
+        if (intent.hasExtra(MainActivity.EXTRA_ITEM_ID)) {
+            itemId = getIntent().getLongExtra(MainActivity.EXTRA_ITEM_ID, 0);
             ContentResolver cr = getContentResolver();
 
             Cursor c = cr.query(Item.buildItemUri(itemId),
@@ -114,7 +115,7 @@ public class AddEditActivity extends BaseActivity {
         if (itemId != null) {
             ConfirmDeleteDialog confirmDialog = new ConfirmDeleteDialog();
             Bundle args = new Bundle();
-            args.putLong(INTENT_ITEMID, itemId);
+            args.putLong(MainActivity.EXTRA_ITEM_ID, itemId);
             confirmDialog.setArguments(args);
             confirmDialog.show(getFragmentManager(), "deletionConfirmation");
         } else {
@@ -131,8 +132,10 @@ public class AddEditActivity extends BaseActivity {
         ContentValues values = new ContentValues();
 
         // set a description and tag if none were entered
-        String description = ((EditText) findViewById(R.id.addedit_edit_description)).getText().toString();
-        String tag = ((Spinner) findViewById(R.id.addedit_edit_tag_primary)).getSelectedItem().toString();
+        String description = ((EditText) findViewById(R.id.addedit_edit_description))
+                .getText().toString();
+        String tag = ((Spinner) findViewById(R.id.addedit_edit_tag_primary))
+                .getSelectedItem().toString();
         description = (description.equals("")) ?
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) : description;
         tag = (tag.equals("Tag")) ? "Text" : tag;
@@ -175,11 +178,12 @@ public class AddEditActivity extends BaseActivity {
                             ContentResolver cr = getActivity().getContentResolver();
 
                             try {
-                                long itemId = getArguments().getLong(INTENT_ITEMID);
+                                long itemId = getArguments().getLong(MainActivity.EXTRA_ITEM_ID);
                                 cr.delete(Item.buildItemUri(itemId), null, null);
                                 getActivity().finish();
                             } catch (SQLException e) {
-                                Toast.makeText(getActivity(), getString(R.string.unable_to_delete), Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(), getString(R.string.unable_to_delete),
+                                        Toast.LENGTH_LONG).show();
                             }
                         }
                     })

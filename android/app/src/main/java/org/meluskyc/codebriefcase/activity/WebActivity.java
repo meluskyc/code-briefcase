@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
@@ -12,37 +13,39 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.server.AppServer;
-import org.meluskyc.codebriefcase.server.AppWebService;
+import org.meluskyc.codebriefcase.server.WebServer;
+import org.meluskyc.codebriefcase.server.WebService;
+import org.meluskyc.codebriefcase.utils.AppUtils;
 
 /**
  * Activity to display information about the web interface.
  */
 public class WebActivity extends BaseActivity {
 
-
     /**
-     * BroadcastReceiver to display messages from AppWebService.
+     * {@code BroadcastReceiver} to display messages from {@link WebService}.
      */
     private StatusReceiver statusReceiver;
     private class StatusReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String serverIp = intent.getStringExtra("serverIp");
-
-            if (serverIp.equals(AppWebService.STATUS_OFFLINE)) {
-                ((TextView) findViewById(R.id.web_text_help)).setText(R.string.to_enable_the_web);
-                findViewById(R.id.web_btn_disconnect).setVisibility(View.INVISIBLE);
-            } else {
-                String clientIp = intent.getStringExtra("clientIp");
+            int deviceIp = ((WifiManager) getSystemService(WIFI_SERVICE))
+                    .getConnectionInfo().getIpAddress();
+            if (deviceIp != 0) {
+                String clientIp = intent.getStringExtra(WebService.EXTRA_CLIENT_IP);
                 if (clientIp.equals("")) {
-                    ((TextView) findViewById(R.id.web_text_help)).setText(getString(R.string.to_use_the_web,
-                            serverIp + ":" + AppServer.PORT));
+                    ((TextView) findViewById(R.id.web_text_help))
+                            .setText(getString(R.string.to_use_the_web,
+                                    AppUtils.formatIpAddress(deviceIp) + ":" + WebServer.PORT));
                     findViewById(R.id.web_btn_disconnect).setVisibility(View.INVISIBLE);
                 } else {
-                    ((TextView) findViewById(R.id.web_text_help)).setText(getString(R.string.connected_to_ip, clientIp));
+                    ((TextView) findViewById(R.id.web_text_help)).setText(
+                            getString(R.string.connected_to_ip, clientIp));
                     findViewById(R.id.web_btn_disconnect).setVisibility(View.VISIBLE);
                 }
+            } else {
+                ((TextView) findViewById(R.id.web_text_help)).setText(R.string.to_enable_the_web);
+                findViewById(R.id.web_btn_disconnect).setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -86,17 +89,17 @@ public class WebActivity extends BaseActivity {
             recreate();
         }
         if (key.equals(getString(R.string.pref_offline_mode_key))) {
-            if (!sharedPreferences.getBoolean(getString(R.string.pref_offline_mode_key), false)) {
-                registerWifiReceiver();
-                registerStatusReceiver();
-                findViewById(R.id.web_text_disable_offline).setVisibility(View.GONE);
-                AppWebService.start(this);
-            } else {
+            if (sharedPreferences.getBoolean(getString(R.string.pref_offline_mode_key), false)) {
                 unregisterWifiReceiver();
                 unregisterStatusReceiver();
                 ((TextView)findViewById(R.id.web_text_help)).setText(R.string.offline_mode_is_on);
                 findViewById(R.id.web_text_disable_offline).setVisibility(View.VISIBLE);
-                AppWebService.stop(this);
+                WebService.stop(this);
+            } else {
+                registerWifiReceiver();
+                registerStatusReceiver();
+                findViewById(R.id.web_text_disable_offline).setVisibility(View.GONE);
+                WebService.start(this);
             }
         }
     }
@@ -106,7 +109,7 @@ public class WebActivity extends BaseActivity {
      * @param view
      */
     public void disconnect(View view) {
-        AppWebService.disconnect(this);
+        WebService.disconnect(this);
     }
 
     public void disableOfflineMode(View view) {
@@ -117,19 +120,19 @@ public class WebActivity extends BaseActivity {
     }
 
     /**
-     * Create and register a new StatusReceiver.
+     * Create and register a new {@code StatusReceiver}.
      */
     private void registerStatusReceiver() {
         if (statusReceiver == null) {
             statusReceiver = new StatusReceiver();
             registerReceiver(statusReceiver,
-                    new IntentFilter("org.meluskyc.codebriefcase.STATUS_UPDATE"));
-            AppWebService.status(this);
+                    new IntentFilter(WebService.ACTION_STATUS_BROADCAST));
+            WebService.status(this);
         }
     }
 
     /**
-     * Unregister the StatusReceiver and set to null.
+     * Unregister the {@code StatusReceiver} and set to null.
      */
     private void unregisterStatusReceiver() {
         if (statusReceiver != null) {

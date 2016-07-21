@@ -3,14 +3,13 @@ package org.meluskyc.codebriefcase.server;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.ContextThemeWrapper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.meluskyc.codebriefcase.R;
-import org.meluskyc.codebriefcase.utils.AppUtils;
 
 import java.io.IOException;
 
@@ -18,15 +17,30 @@ import java.io.IOException;
  * {@link Service} class to manage starting and stopping the web
  * server.
  */
-public class AppWebService extends Service {
+public class WebService extends Service {
+
+    /**
+     * Listen for this {@code Intent} action to receive server status updates
+     */
+    public static final String ACTION_STATUS_BROADCAST
+            = "org.meluskyc.codebriefcase.STATUS_BROADCAST";
+
+    /**
+     * Client IP address sent with broadcasts of {@link WebService#ACTION_STATUS_BROADCAST}
+     */
+    public static final String EXTRA_CLIENT_IP = "clientIp";
+
+    /**
+     * Server is currently offline. Sent as {@link WebService#EXTRA_CLIENT_IP}.
+     */
+    public static final String STATUS_SERVER_OFFLINE = "offline";
 
     private static final String ACTION_START = "org.meluskyc.codebriefcase.START";
     private static final String ACTION_STOP = "org.meluskyc.codebriefcase.STOP";
     private static final String ACTION_STATUS = "org.meluskyc.codebriefcase.STATUS";
     private static final String ACTION_DISCONNECT = "org.meluskyc.codebriefcase.DISCONNECT";
-    public static final String STATUS_OFFLINE = "OFFLINE";
 
-    private AppServer server;
+    private WebServer server;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -74,10 +88,10 @@ public class AppWebService extends Service {
             try {
                 AlertDialog.Builder incomingConnectionBuilder = new AlertDialog.Builder
                         (new ContextThemeWrapper(this, R.style.AppTheme_Dark));
-                server = new AppServer(this, incomingConnectionBuilder);
+                server = new WebServer(this, incomingConnectionBuilder);
                 status();
             } catch (IOException e) {
-                Log.e("AppWebService", "Unable to start server.");
+                Log.e("WebService", "Unable to start server.");
             }
         }
     }
@@ -86,17 +100,17 @@ public class AppWebService extends Service {
      * Broadcast an {@link Intent} with the server's status.
      */
     private void status() {
-        Intent statusIntent = new Intent("org.meluskyc.codebriefcase.STATUS_UPDATE");
-        int ip = ((WifiManager) getSystemService(WIFI_SERVICE)).getConnectionInfo().getIpAddress();
-        if (ip != 0) {
-            statusIntent.putExtra("serverIp", AppUtils.formatIpAddress(ip));
-        } else {
-            statusIntent.putExtra("serverIp", STATUS_OFFLINE);
-        }
+        Intent statusIntent = new Intent(ACTION_STATUS_BROADCAST);
         if (server != null) {
-            statusIntent.putExtra("clientIp", server.getClientIpAddress());
+            String ip = server.getClientIpAddress();
+            if (!TextUtils.isEmpty(ip)) {
+                statusIntent.putExtra(EXTRA_CLIENT_IP, ip);
+            } else {
+                statusIntent.putExtra(EXTRA_CLIENT_IP, "");
+            }
+
         } else {
-            statusIntent.putExtra("clientIp", "");
+            statusIntent.putExtra(EXTRA_CLIENT_IP, STATUS_SERVER_OFFLINE);
         }
         sendBroadcast(statusIntent);
     }
@@ -118,7 +132,7 @@ public class AppWebService extends Service {
      * @param context
      */
     public static void start(Context context) {
-        Intent intent = new Intent(context, AppWebService.class);
+        Intent intent = new Intent(context, WebService.class);
         intent.setAction(ACTION_START);
         context.startService(intent);
     }
@@ -128,7 +142,7 @@ public class AppWebService extends Service {
      * @param context
      */
     public static void stop(Context context) {
-        Intent intent = new Intent(context, AppWebService.class);
+        Intent intent = new Intent(context, WebService.class);
         intent.setAction(ACTION_STOP);
         context.startService(intent);
     }
@@ -139,18 +153,19 @@ public class AppWebService extends Service {
      * @param context
      */
     public static void disconnect(Context context) {
-        Intent intent = new Intent(context, AppWebService.class);
+        Intent intent = new Intent(context, WebService.class);
         intent.setAction(ACTION_DISCONNECT);
         context.startService(intent);
     }
 
     /**
      * Start the {@link Service} with an {@link Intent} to broadcast the
-     * server's status
+     * server's status with {@code Intent} action
+     * {@link WebService#ACTION_STATUS_BROADCAST}
      * @param context
      */
     public static void status(Context context) {
-        Intent intent = new Intent(context, AppWebService.class);
+        Intent intent = new Intent(context, WebService.class);
         intent.setAction(ACTION_STATUS);
         context.startService(intent);
     }

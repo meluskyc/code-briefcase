@@ -14,10 +14,15 @@ import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
-public class SecurityHandler extends AppRouter.DefaultHandler {
+public class SecurityHandler extends WebRouter.DefaultHandler {
     private static final String URI_CONNECT = "/connect";
     private static final String URI_CONNECT_IMAGE = "/assets/images/connect(.*).png";
     private static final String REJECTED_IP = "reject";
+
+    // time to keep the dialog open
+    // default 30 seconds
+    public static final int DIALOG_TIMEOUT = 30000;
+
 
     @Override
     public String getText() {
@@ -34,7 +39,7 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
         return NanoHTTPD.Response.Status.OK;
     }
 
-    public NanoHTTPD.Response get(AppRouter.UriResource uriResource, Map<String, String> urlParams,
+    public NanoHTTPD.Response get(WebRouter.UriResource uriResource, Map<String, String> urlParams,
                                   NanoHTTPD.IHTTPSession session) {
         String uri = session.getUri();
         if (uri.equals(URI_CONNECT)) {
@@ -46,10 +51,10 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                         "application/json", "{ \"result\":\"reject\" }");
             }
         } else if (uri.matches(URI_CONNECT_IMAGE)) {
-            return AppServer.serveStaticFile(AppServer.normalizeUri(
-                    AppServer.PATH_WEBROOT + uri), session);
+            return WebServer.serveStaticFile(WebServer.normalizeUri(
+                    WebServer.PATH_WEBROOT + uri), session);
         } else {
-            return AppServer.serveStaticFile(AppServer.PATH_CONNECT_PAGE, session);
+            return WebServer.serveStaticFile(WebServer.PATH_CONNECT_PAGE, session);
         }
     }
 
@@ -61,10 +66,10 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
      * @return true if accepted
      */
     public synchronized boolean showIncomingAlert(final NanoHTTPD.IHTTPSession session) {
-        String clientIp = AppServer.getClientIpAddress();
+        String clientIp = WebServer.getClientIpAddress();
         final AlertDialog.Builder incomingConnectionBuilder
-                = AppServer.getIncomingConnectionBuilder();
-        final Context context = AppServer.getContext();
+                = WebServer.getDialogBuilder();
+        final Context context = WebServer.getContext();
 
         if (TextUtils.isEmpty(clientIp)) {
             final Handler handler = new Handler(Looper.getMainLooper());
@@ -79,14 +84,14 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                             .setPositiveButton(context.getString(R.string.accept), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AppServer.setClientIpAddress(ip);
+                                    WebServer.setClientIpAddress(ip);
                                     dialog.dismiss();
                                 }
                             })
                             .setNegativeButton(context.getString(R.string.reject), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AppServer.setClientIpAddress(REJECTED_IP);
+                                    WebServer.setClientIpAddress(REJECTED_IP);
                                     dialog.dismiss();
                                 }
                             });
@@ -98,7 +103,7 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                     final Runnable runnable = new Runnable() {
                         @Override
                         public void run() {
-                            AppServer.setClientIpAddress(REJECTED_IP);
+                            WebServer.setClientIpAddress(REJECTED_IP);
                             if (dialog.isShowing()) {
                                 dialog.dismiss();
                             }
@@ -112,20 +117,20 @@ public class SecurityHandler extends AppRouter.DefaultHandler {
                         }
                     });
 
-                    handler.postDelayed(runnable, 30000);
+                    handler.postDelayed(runnable, DIALOG_TIMEOUT);
 
                 }
             });
-            while (TextUtils.isEmpty(AppServer.getClientIpAddress())) { }
-            if (AppServer.getClientIpAddress().equals(REJECTED_IP)) {
-                AppServer.setClientIpAddress(null);
+            while (TextUtils.isEmpty(WebServer.getClientIpAddress())) { }
+            if (WebServer.getClientIpAddress().equals(REJECTED_IP)) {
+                WebServer.setClientIpAddress(null);
                 return false;
             } else {
-                AppWebService.status(context);
+                WebService.status(context);
                 return true;
             }
         } else {
-            AppServer.setClientIpAddress(null);
+            WebServer.setClientIpAddress(null);
             return false;
         }
     }

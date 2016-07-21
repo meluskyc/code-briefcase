@@ -37,6 +37,7 @@ package org.meluskyc.codebriefcase.server;
  * Modifications:
  * -Imported from NanoHTTPD at https://git.io/vKYxK
  * -Changed package name
+ * -Changed class name
  * -Changed addRoute() to process mappings in-order
  */
 
@@ -65,12 +66,12 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
  * @author vnnv
  * @author ritchieGitHub
  */
-public class AppRouter extends NanoHTTPD {
+public class WebRouter extends NanoHTTPD {
 
     /**
      * logger to log to.
      */
-    private static final Logger LOG = Logger.getLogger(AppRouter.class.getName());
+    private static final Logger LOG = Logger.getLogger(WebRouter.class.getName());
 
     public interface UriResponder {
 
@@ -535,12 +536,12 @@ public class AppRouter extends NanoHTTPD {
 
     private UriRouter router;
 
-    public AppRouter(int port) {
+    public WebRouter(int port) {
         super(port);
         router = new UriRouter();
     }
 
-    public AppRouter(String hostname, int port) {
+    public WebRouter(String hostname, int port) {
         super(hostname, port);
         router = new UriRouter();
     }
