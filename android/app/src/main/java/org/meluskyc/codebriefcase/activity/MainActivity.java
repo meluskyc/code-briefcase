@@ -2,15 +2,11 @@ package org.meluskyc.codebriefcase.activity;
 
 import android.app.LoaderManager;
 import android.app.SearchManager;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,22 +14,19 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import org.meluskyc.codebriefcase.R;
+import org.meluskyc.codebriefcase.adapter.ItemsCursorAdapter;
 import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Item;
 import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.ItemSearch;
 import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Qualified;
@@ -69,19 +62,19 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     private final int FILTER_NONE = -1;
 
     /**
-     * {@code ListView} filter starred
+     * {@code RecyclerView} filter starred
      */
     private final int FILTER_STARRED = -2;
 
     /**
-     * {@code ListView} filter. Initialize to none.
+     * {@code RecyclerView} filter. Initialize to none.
      */
     private long filter = FILTER_NONE;
 
     /**
-     * Adapter for the {@code ListView}
+     * Adapter for the {@code RecyclerView}
      */
-    private SimpleCursorAdapter itemsAdapter;
+    private ItemsCursorAdapter itemsAdapter;
 
     /**
      * store the tag ID for each tag filter
@@ -140,75 +133,15 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
      * Sets up the list view.
      */
     private void setupListView() {
-        ListView itemsList = (ListView) findViewById(R.id.main_list_items);
-        itemsAdapter = new SimpleCursorAdapter(this, R.layout.item_main, null,
-                new String[]{Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
-                        Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY, Tag.TAG_COLOR,
-                        Item.ITEM_STARRED},
-                new int[] {R.id.main_text_tag_primary, R.id.main_text_description,
-                        R.id.main_text_date_updated,
-                        R.id.main_text_tag_secondary, SimpleCursorAdapter.NO_SELECTION,
-                        R.id.main_image_starred}, 0);
+        RecyclerView recyclerview = (RecyclerView) findViewById(R.id.main_list_items);
+        recyclerview.setLayoutManager(new LinearLayoutManager(this));
 
-        itemsAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+        itemsAdapter = new ItemsCursorAdapter();
+        itemsAdapter.setHasStableIds(true);
+        //recyclerview.setHasFixedSize(true);
 
-                switch (columnIndex) {
-                    case 1:
-                        view.setBackgroundColor(Color.parseColor(cursor.getString(
-                                cursor.getColumnIndex(Tag.TAG_COLOR))));
-                        ((TextView) view).setText(cursor.getString(
-                                cursor.getColumnIndex(Item.ITEM_TAG_PRIMARY)));
-                        return true;
-                    case 3:
-                        long dateLong = cursor.getLong(cursor.getColumnIndex(Item.ITEM_DATE_UPDATED));
-                        ((TextView) view).setText(DateUtils.getRelativeTimeSpanString(dateLong,
-                                System.currentTimeMillis(), DateUtils.FORMAT_ABBREV_RELATIVE));
-                        return true;
-                    case 6:
-                        switch (cursor.getInt(cursor.getColumnIndex(Item.ITEM_STARRED))) {
-                            case 0:
-                                ((ImageView) view).setImageResource(
-                                        R.drawable.ic_star_outline_24dp);
-                                view.setTag(0);
-                                break;
-                            case 1:
-                                ((ImageView) view).setImageResource(
-                                        R.drawable.ic_star_24dp);
-                                view.setTag(1);
-                                break;
-                            default:
-                                ((ImageView) view).setImageResource(
-                                        R.drawable.ic_star_outline_24dp);
-                                view.setTag(0);
-                                break;
-                        }
-                        final long itemId = cursor.getLong(cursor.getColumnIndex("_id"));
+        recyclerview.setAdapter(itemsAdapter);
 
-                        view.setOnClickListener(new View.OnClickListener() {
-                            long _itemId = itemId;
-
-                            public void onClick(View v) {
-                                toggleStarred(_itemId, (ImageView) v);
-                            }
-                        });
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        });
-
-        itemsList.setAdapter(itemsAdapter);
-        itemsList.setTextFilterEnabled(true);
-
-        itemsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(new Intent(MainActivity.this,
-                        AddEditActivity.class).putExtra(EXTRA_ITEM_ID, id));
-            }
-        });
     }
 
 
@@ -306,7 +239,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         switch (loader.getId()) {
             case ITEMS_LOADER:
-                itemsAdapter.swapCursor(cursor);
+                itemsAdapter.setCursor(cursor);
                 break;
             case TAGS_LOADER:
                 filterIdsMap.clear();
@@ -339,7 +272,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
             case ITEMS_LOADER:
-                itemsAdapter.swapCursor(null);
+                itemsAdapter.setCursor(null);
                 break;
             default:
                 break;
@@ -392,36 +325,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         getLoaderManager().restartLoader(ITEMS_LOADER, null, this);
         itemsAdapter.notifyDataSetChanged();
         return true;
-    }
-
-    /**
-     * Star or unstar an item
-     * @param itemId the item's ID
-     * @param imageView the star icon of the item clicked
-     */
-    private void toggleStarred(long itemId, ImageView imageView) {
-        ContentResolver cr = getContentResolver();
-        ContentValues values = new ContentValues();
-        int tagValue = (int) imageView.getTag();
-        switch (tagValue) {
-            case 0: {
-                tagValue = 1;
-                imageView.setImageResource(R.drawable.ic_star_24dp);
-                break;
-            } default: {
-                tagValue = 0;
-                imageView.setImageResource(R.drawable.ic_star_outline_24dp);
-                break;
-            }
-        }
-        imageView.setTag(tagValue);
-        values.put(Item.ITEM_STARRED, tagValue);
-
-        try {
-            cr.update(Item.buildItemUri(itemId), values, null, null);
-        } catch (SQLException e) {
-            Toast.makeText(this, "Error updating record.", Toast.LENGTH_LONG).show();
-        }
     }
 
 }
