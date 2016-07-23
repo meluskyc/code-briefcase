@@ -47,7 +47,6 @@
             android:textColor="@color/darkblue"
             android:text="@string/disable_offline_mode"
             android:visibility="gone"
-            android:onClick="disableOfflineMode"
             android:layout_below="@id/web_text_help"
             android:layout_centerInParent="true"
             />
@@ -60,7 +59,6 @@
             android:text="@string/disconnect"
             android:visibility="invisible"
             android:layout_below="@id/web_text_disable_offline"
-            android:onClick="disconnect"
             android:layout_centerInParent="true"/>
 
     </RelativeLayout>

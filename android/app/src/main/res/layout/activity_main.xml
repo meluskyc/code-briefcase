@@ -27,18 +27,6 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <!--
-        <ListView
-            android:id="@+id/main_list_items"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:clickable="true"
-            />
-        -->
         <android.support.v7.widget.RecyclerView
             android:id="@+id/main_list_items"
             android:layout_width="match_parent"

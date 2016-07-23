@@ -135,7 +135,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         RecyclerView recyclerview = (RecyclerView) findViewById(R.id.main_list_items);
         recyclerview.setLayoutManager(new LinearLayoutManager(this));
 
-        itemsAdapter = new ItemsCursorAdapter();
+        itemsAdapter = new ItemsCursorAdapter(this);
         itemsAdapter.setHasStableIds(true);
         //recyclerview.setHasFixedSize(true);
 

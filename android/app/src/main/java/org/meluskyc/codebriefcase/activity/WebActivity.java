@@ -50,7 +50,19 @@ public class WebActivity extends BaseActivity {
         }
     }
 
-
+    private View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.web_btn_disconnect:
+                    disconnect();
+                    break;
+                case R.id.web_text_disable_offline:
+                    disableOfflineMode();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +73,9 @@ public class WebActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         this.setTitle(getString(R.string.web));
+
+        findViewById(R.id.web_text_disable_offline).setOnClickListener(onClickListener);
+        findViewById(R.id.web_btn_disconnect).setOnClickListener(onClickListener);
     }
 
     @Override
@@ -106,13 +121,12 @@ public class WebActivity extends BaseActivity {
 
     /**
      * Disconnect from the current client.
-     * @param view
      */
-    public void disconnect(View view) {
+    public void disconnect() {
         WebService.disconnect(this);
     }
 
-    public void disableOfflineMode(View view) {
+    public void disableOfflineMode() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor	= sharedPreferences.edit();
         editor.putBoolean(getString(R.string.pref_offline_mode_key), false);

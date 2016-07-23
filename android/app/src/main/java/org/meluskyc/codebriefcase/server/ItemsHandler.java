@@ -41,12 +41,16 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
         return NanoHTTPD.Response.Status.OK;
     }
 
-        /*
-        GET /api/items      all items
-        GET /api/items/tag  distinct tags for items
-        GET /api/items/:id  item by ID
-         */
-
+    /**
+     * GET /api/items      all items
+     * GET /api/items/tag  distinct tags for items
+     * GET /api/items/:id  item by ID
+     *
+     * @param uriResource
+     * @param urlParams
+     * @param session
+     * @return
+     */
     @Override
     public NanoHTTPD.Response get(WebRouter.UriResource uriResource, Map<String, String> urlParams,
                                   NanoHTTPD.IHTTPSession session) {
@@ -101,10 +105,14 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
         return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), inp, size);
     }
 
-        /*
-        DELETE /api/items/:id      delete item by ID
-         */
-
+    /**
+     * DELETE /api/items/:id      delete item by ID
+     *
+     * @param uriResource
+     * @param urlParams
+     * @param session
+     * @return
+     */
     @Override
     public NanoHTTPD.Response delete(WebRouter.UriResource uriResource, Map<String,
             String> urlParams, NanoHTTPD.IHTTPSession session) {
@@ -142,10 +150,14 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
         return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), inp, size);
     }
 
-        /*
-        POST /api/items/      add an item
-         */
-
+    /**
+     * POST /api/items/      add an item
+     *
+     * @param uriResource
+     * @param urlParams
+     * @param session
+     * @return
+     */
     @Override
     public NanoHTTPD.Response post(WebRouter.UriResource uriResource, Map<String,
             String> urlParams, NanoHTTPD.IHTTPSession session) {
@@ -202,10 +214,14 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
         return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), inp, size);
     }
 
-        /*
-        PUT /api/items/:id      update item by ID
-         */
-
+    /**
+     * PUT /api/items/:id      update item by ID
+     *
+     * @param uriResource
+     * @param urlParams
+     * @param session
+     * @return
+     */
     @Override
     public NanoHTTPD.Response put(WebRouter.UriResource uriResource, Map<String, String> urlParams,
                                   NanoHTTPD.IHTTPSession session) {
@@ -244,9 +260,9 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
                                     Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
                     text = AppUtils.cur2Json(c).getJSONObject(0).toString();
                 } catch (IOException e) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", null);
+                    return new ErrorHandlers.InternalServerErrorHandler().get(null, null, session);
                 } catch (JSONException e) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain", null);
+                    return new ErrorHandlers.InternalServerErrorHandler().get(null, null, session);
                 }
                 break;
         }

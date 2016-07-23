@@ -25,7 +25,7 @@ import org.meluskyc.codebriefcase.database.CodeBriefcaseContract.Tag;
 public class ItemsCursorAdapter extends RecyclerView.Adapter<ItemsCursorAdapter.ViewHolder> {
 
     private Cursor cursor;
-    private Context context;
+    private final Context context;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tag_primary;
@@ -45,6 +45,10 @@ public class ItemsCursorAdapter extends RecyclerView.Adapter<ItemsCursorAdapter.
         }
     }
 
+    public ItemsCursorAdapter(Context context) {
+        this.context = context;
+    }
+
     public Cursor getCursor() {
         return cursor;
     }
@@ -56,7 +60,6 @@ public class ItemsCursorAdapter extends RecyclerView.Adapter<ItemsCursorAdapter.
 
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
-        context = parent.getContext();
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_main, parent, false );
 

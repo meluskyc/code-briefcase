@@ -19,8 +19,10 @@ public class SecurityHandler extends WebRouter.DefaultHandler {
     private static final String URI_CONNECT_IMAGE = "/assets/images/connect(.*).png";
     private static final String REJECTED_IP = "reject";
 
-    // time to keep the dialog open
-    // default 30 seconds
+    /**
+     * time to keep the dialog open
+     * default is 30 seconds
+      */
     public static final int DIALOG_TIMEOUT = 30000;
 
 
