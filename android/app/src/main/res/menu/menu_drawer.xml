@@ -13,10 +13,10 @@
             android:icon="@drawable/ic_settings_24dp"
             android:title="@string/nav_settings" />
         <item
-            android:id="@+id/nav_add"
+            android:id="@+id/nav_about"
             android:checkable="false"
-            android:icon="@drawable/ic_nav_add"
-            android:title="@string/nav_add" />
+            android:icon="@drawable/ic_info_outline_black_24dp"
+            android:title="@string/nav_about" />
 
         <group android:checkableBehavior="single" android:id="@+id/nav_filters">
         </group>

@@ -52,5 +52,9 @@
     <string name="disable_offline_mode">Disable offline mode?</string>
     <string name="disconnect">Disconnect</string>
     <string name="Filter">Filter</string>
+    <string name="nav_about">About</string>
+    <string name="title_activity_about">About</string>
+    <string name="code_briefcase"><![CDATA[<b>Code Briefcase</b><br>Version %s]]></string>
+    <string name="view_the_source">View the source code</string>
 
 </resources>

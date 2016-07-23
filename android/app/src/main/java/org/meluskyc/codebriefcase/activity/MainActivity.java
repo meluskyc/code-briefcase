@@ -19,7 +19,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -172,15 +171,15 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                                 menuItem.setChecked(false);
                                 startActivity(new Intent(MainActivity.this, WebActivity.class));
                                 break;
-                            case R.id.nav_add:
-                                menuItem.setChecked(false);
-                                startActivity(new Intent(MainActivity.this,
-                                        AddEditActivity.class));
-                                break;
                             case R.id.nav_settings:
                                 menuItem.setChecked(false);
                                 startActivity(new Intent(MainActivity.this,
                                         SettingsActivity.class));
+                                break;
+                            case R.id.nav_about:
+                                menuItem.setChecked(false);
+                                startActivity(new Intent(MainActivity.this,
+                                        AboutActivity.class));
                                 break;
                             default:
                                 if (filter == filterIdsMap.get(menuItem.toString())) {
