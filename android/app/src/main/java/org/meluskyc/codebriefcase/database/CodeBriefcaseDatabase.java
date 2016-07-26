@@ -2,6 +2,7 @@ package org.meluskyc.codebriefcase.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -50,26 +51,20 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
         String ITEM_SEARCH_STARRED = "starred";
     }
 
-    private static CodeBriefcaseDatabase dbHelper;
     private Context context;
 
-    private CodeBriefcaseDatabase(Context context) {
+    public CodeBriefcaseDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
-        this.context = context.getApplicationContext();
-    }
-
-    public static synchronized CodeBriefcaseDatabase getInstance(Context context) {
-        if (dbHelper == null) {
-            dbHelper = new CodeBriefcaseDatabase(context.getApplicationContext());
-        }
-        return dbHelper;
+        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String[] tags = context.getResources().getStringArray(R.array.Tag);
-        String[] tagAceModes = context.getResources().getStringArray(R.array.TagAceMode);
-        String[] tagColors = context.getResources().getStringArray(R.array.TagColors);
+        String[] tags, tagAceModes, tagColors;
+        Resources resources = context.getResources();
+        tags = resources.getStringArray(R.array.Tag);
+        tagAceModes = resources.getStringArray(R.array.TagAceMode);
+        tagColors = resources.getStringArray(R.array.TagColors);
 
         db.execSQL("CREATE TABLE " + Tables.ITEM + " ("
                 + ItemColumns.ITEM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -149,20 +144,6 @@ public class CodeBriefcaseDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + Tables.ITEM);
-        db.execSQL("DROP TABLE IF EXISTS " + Tables.TAG);
-        db.execSQL("DROP TABLE IF EXISTS " + Tables.ITEM_SEARCH);
-        db.execSQL("DROP INDEX IF EXISTS " + Indices.INDEX_TAG_NAME);
-        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_BU);
-        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_BD);
-        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_AU);
-        db.execSQL("DROP TRIGGER IF EXISTS " + Triggers.ITEM_SEARCH_AI);
-        onCreate(db);
-    }
-
-    @Override
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db, oldVersion, newVersion);
     }
 
 }

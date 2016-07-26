@@ -29,7 +29,7 @@ public class CodeBriefcaseProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        dbHelper = CodeBriefcaseDatabase.getInstance(getContext());
+        dbHelper = new CodeBriefcaseDatabase(getContext());
         uriMatcher = new CodeBriefcaseProviderUriMatcher();
         return true;
     }
