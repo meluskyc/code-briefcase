@@ -41,7 +41,7 @@
             />
 
         <TextView
-            android:id="@+id/about_link"
+            android:id="@+id/about_text_source"
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,8 +49,20 @@
             android:layout_below="@id/about_text_version"
             android:layout_marginTop="10dp"
             android:textColor="@color/darkblue"
-            android:gravity="center"
             android:text="@string/view_the_source"
+            />
+
+        <TextView
+            android:id="@+id/about_text_licenses"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_below="@id/about_text_source"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/darkblue"
+            android:gravity="center"
+            android:text="@string/licenses"
             />
 
 

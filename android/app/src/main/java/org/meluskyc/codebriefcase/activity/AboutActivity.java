@@ -19,7 +19,15 @@ public class AboutActivity extends BaseActivity {
 
         @Override
         public void onClick(View v) {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(REPO_URL)));
+            switch (v.getId()) {
+                case R.id.about_text_source:
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(REPO_URL)));
+                    break;
+                case R.id.about_text_licenses:
+                    startActivity(new Intent(AboutActivity.this, LicensesActivity.class));
+                    break;
+            }
+
         }
     };
 
@@ -33,8 +41,10 @@ public class AboutActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         TextView main = (TextView) findViewById(R.id.about_text_version);
+        TextView sourceLink = (TextView) findViewById(R.id.about_text_source);
+        TextView licensesLink = (TextView) findViewById(R.id.about_text_licenses);
         main.setText(Html.fromHtml(getString(R.string.code_briefcase, BuildConfig.VERSION_NAME)));
-        TextView link = (TextView) findViewById(R.id.about_link);
-        link.setOnClickListener(listener);
+        sourceLink.setOnClickListener(listener);
+        licensesLink.setOnClickListener(listener);
     }
 }
