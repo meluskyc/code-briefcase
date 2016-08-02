@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.WindowManager;
 
 import org.meluskyc.codebriefcase.R;
@@ -98,7 +100,7 @@ public class SecurityHandler extends WebRouter.DefaultHandler {
                                 }
                             });
                     final AlertDialog dialog = incomingConnectionBuilder.create();
-                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                    dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
                     dialog.show();
 
                     final Handler handler  = new Handler();
