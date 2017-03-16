@@ -54,11 +54,16 @@ public class AppUtils {
             int i;
             for (  i = 0; i < totalColumn; i++) {
                 if (cursor.getColumnName(i) != null) {
+                    Object val;
+                    if (cursor.getType(i) == Cursor.FIELD_TYPE_INTEGER) {
+                        val = cursor.getLong(i);
+                    } else {
+                        val = cursor.getString(i);
+                    }
                     String getcol = cursor.getColumnName(i);
-                    String getstr = cursor.getString(i);
 
                     try {
-                        rowObject.put(getcol, getstr);
+                        rowObject.put(getcol, val);
                     } catch (JSONException e) {
                         Log.e("Server", "Unable to serialize cursor");
                     }

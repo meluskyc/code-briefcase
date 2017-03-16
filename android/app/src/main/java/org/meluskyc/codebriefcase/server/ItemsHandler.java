@@ -3,8 +3,6 @@ package org.meluskyc.codebriefcase.server;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -61,7 +59,7 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
         switch (uriResource.initParameter(ApiUriEnum.class)) {
             case ITEMS:
                 c = cr.query(Item.buildTagDirUri(),
-                        new String[]{Qualified.ITEM_ID, Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
+                        new String[]{Qualified.ITEM_ID + " AS id", Item.ITEM_TAG_PRIMARY, Item.ITEM_DESCRIPTION,
                                 Item.ITEM_DATE_UPDATED, Item.ITEM_TAG_SECONDARY, Tag.TAG_COLOR,
                                 Item.ITEM_STARRED}, null, null,
                         Item.ITEM_DATE_UPDATED + " DESC");
@@ -83,7 +81,7 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
                 }
 
                 c = cr.query(Item.buildTagItemUri(id),
-                        new String[]{Qualified.ITEM_ID, Item.ITEM_TAG_PRIMARY,
+                        new String[]{Qualified.ITEM_ID + " AS id", Item.ITEM_TAG_PRIMARY,
                                 Item.ITEM_DESCRIPTION, Item.ITEM_DATE_UPDATED,
                                 Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT,
                                 Tag.TAG_ACE_MODE}, null, null, null);
@@ -166,7 +164,7 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
         byte[] buffer;
         int contentLength;
         String text = null;
-        String bufferText, description, tag_primary;
+        String bufferText, description, tag_primary, content, tag_secondary;
 
         switch (uriResource.initParameter(ApiUriEnum.class)) {
             case ITEMS:
@@ -179,27 +177,28 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
                     JSONObject item = new JSONObject(bufferText);
 
                     // set a description and tag if none were entered
-                    description = item.getString(Item.ITEM_DESCRIPTION);
-                    tag_primary = item.getString(Item.ITEM_TAG_PRIMARY);
-                    description = TextUtils.isEmpty(description) ?
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
-                            : description;
-                    tag_primary = (TextUtils.isEmpty(tag_primary) || tag_primary.equals("Tag"))
-                            ? "Text" : tag_primary;
+                    // todo: validate tag_primary
+                    description = item.has(Item.ITEM_DESCRIPTION)
+                            ? item.getString(Item.ITEM_DESCRIPTION)
+                            : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                    tag_primary = item.has(Item.ITEM_TAG_PRIMARY)
+                            ? item.getString(Item.ITEM_TAG_PRIMARY)
+                            : "Text";
+                    content = item.has(Item.ITEM_CONTENT)
+                            ? item.getString(Item.ITEM_CONTENT)
+                            : "";
+                    tag_secondary = item.has(Item.ITEM_TAG_SECONDARY)
+                            ? item.getString(Item.ITEM_TAG_SECONDARY)
+                            : "";
 
                     values.put(Item.ITEM_DESCRIPTION, description);
-                    values.put(Item.ITEM_CONTENT, item.getString(Item.ITEM_CONTENT));
+                    values.put(Item.ITEM_CONTENT, content);
                     values.put(Item.ITEM_TAG_PRIMARY, tag_primary);
-                    values.put(Item.ITEM_TAG_SECONDARY, item.getString(Item.ITEM_TAG_SECONDARY));
+                    values.put(Item.ITEM_TAG_SECONDARY, tag_secondary);
                     values.put(Item.ITEM_DATE_CREATED, System.currentTimeMillis());
                     values.put(Item.ITEM_DATE_UPDATED, System.currentTimeMillis());
 
-                    Uri newRow = cr.insert(Item.CONTENT_URI, values);
-
-                    c = cr.query(Item.buildItemUri(Long.parseLong(newRow.getLastPathSegment())),
-                            new String[]{Item.ITEM_DESCRIPTION, Item.ITEM_TAG_PRIMARY,
-                                    Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
-                    text = AppUtils.cur2Json(c).getJSONObject(0).toString();
+                    cr.insert(Item.CONTENT_URI, values);
                 } catch (IOException e) {
                     return new ErrorHandlers.InternalServerErrorHandler().get(null, null, session);
                 } catch (JSONException e) {
@@ -209,9 +208,7 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
             default:
                 return new ErrorHandlers.InternalServerErrorHandler().get(null, null, session);
         }
-        ByteArrayInputStream inp = new ByteArrayInputStream(text.getBytes());
-        int size = text.getBytes().length;
-        return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), inp, size);
+        return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), "");
     }
 
     /**
@@ -226,9 +223,7 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
     public NanoHTTPD.Response put(WebRouter.UriResource uriResource, Map<String, String> urlParams,
                                   NanoHTTPD.IHTTPSession session) {
         ContentResolver cr = WebServer.getContext().getContentResolver();
-        Cursor c;
         byte[] buffer;
-        String text = null;
         String bufferText = null;
 
         switch (uriResource.initParameter(ApiUriEnum.class)) {
@@ -254,11 +249,6 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
                     }
 
                     cr.update(Item.buildItemUri(id), values, null, null);
-
-                    c = cr.query(Item.buildItemUri(id),
-                            new String[]{Item.ITEM_DESCRIPTION, Item.ITEM_TAG_PRIMARY,
-                                    Item.ITEM_TAG_SECONDARY, Item.ITEM_CONTENT}, null, null, null);
-                    text = AppUtils.cur2Json(c).getJSONObject(0).toString();
                 } catch (IOException e) {
                     return new ErrorHandlers.InternalServerErrorHandler().get(null, null, session);
                 } catch (JSONException e) {
@@ -266,8 +256,6 @@ public class ItemsHandler extends WebRouter.DefaultHandler {
                 }
                 break;
         }
-        ByteArrayInputStream inp = new ByteArrayInputStream(text.getBytes());
-        int size = text.getBytes().length;
-        return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), inp, size);
+        return NanoHTTPD.newFixedLengthResponse(getStatus(), getMimeType(), "");
     }
 }

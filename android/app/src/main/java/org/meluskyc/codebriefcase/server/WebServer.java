@@ -20,7 +20,7 @@ import fi.iki.elonen.NanoHTTPD;
 public class WebServer extends WebRouter {
     public static final String PATH_WEBROOT = "webapp";
     public static final String PATH_HOME_PAGE = "webapp/index.html";
-    public static final String PATH_CONNECT_PAGE = "webapp/connect.html";
+    public static final String PATH_CONNECT_PAGE = "webapp/assets/connect.html";
 
     /**
      * Port. Default is 9999.
