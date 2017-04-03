@@ -1,0 +1,20 @@
+.tag-primary {
+  height: 100%;
+  min-width: 10%;
+  justify-content: center;
+  align-items: center;
+  display:flex;
+  color: #FFFFFF;
+}
+
+.mat-nav-list {
+  padding-top: 0;
+}
+
+.date-star {
+  align-items: flex-end;
+}
+
+.date-star > p {
+  color: #0099CC;
+}

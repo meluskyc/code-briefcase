@@ -1,0 +1,30 @@
+<md-sidenav-container>
+  <md-sidenav mode="side" opened="true">
+    <a [routerLink]="['/']" class="logo">
+      <img src="assets/images/logo.svg" alt="logo" />
+    </a>
+    <a md-button class="tag-filter" [routerLink]="['/']"
+       [queryParams]="filter === 'Starred' ? {} : {filter: 'Starred'}">
+      <md-icon *ngIf="filter !== 'Starred'" class="starred">star</md-icon>
+      <md-icon *ngIf="filter === 'Starred'">star_outline</md-icon>
+    </a>
+    <a md-button class="tag-filter" *ngFor="let tag of itemTags" [routerLink]="['/']"
+       [queryParams]="filter === tag.tag_primary ? {} : {filter: tag.tag_primary}">
+      {{tag.tag_primary}}
+    </a>
+  </md-sidenav>
+    <md-toolbar color="primary">
+        <button md-icon-button *ngIf="backEnabled" (click)="goBack()" class="back-arrow">
+          <md-icon md-button>arrow_back</md-icon>
+        </button>
+        <span>{{heading}}</span>
+        <span class="spacer"></span>
+        <button md-icon-button *ngFor="let control of controls" (click)="performAction(control.action)">
+          <md-icon class="app-icon">{{control.icon}}</md-icon>
+        </button>
+    </md-toolbar>
+  <router-outlet></router-outlet>
+</md-sidenav-container>
+<button md-fab class="fab-add" color="accent" *ngIf="fab" (click)="performAction(fab.action)">
+  <md-icon>{{fab.icon}}</md-icon>
+</button>

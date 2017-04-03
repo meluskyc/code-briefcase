@@ -1,0 +1,18 @@
+<md-nav-list>
+  <md-list-item *ngFor="let item of filteredItems" [routerLink]="['/detail', item.id]">
+    <div class="tag-primary" [ngStyle]="{'background-color':item.color}">
+      <h3>{{item.tag_primary}}</h3>
+    </div>
+    <div class="mat-list-text">
+      <h3 md-line>{{item.description}}</h3>
+      <h1 md-line>{{item.tag_secondary}}</h1>
+    </div>
+    <div class="mat-list-text date-star">
+      <p>{{convertTime(item.date_updated)}}</p>
+      <button class="star" md-icon-button (click)="star(item); $event.stopPropagation()">
+        <md-icon *ngIf="item.starred !== 1">star_outline</md-icon>
+        <md-icon *ngIf="item.starred === 1" class="starred">star</md-icon>
+      </button>
+    </div>
+  </md-list-item>
+</md-nav-list>

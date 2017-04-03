@@ -1,0 +1,23 @@
+<form>
+  <div>
+    <md-input-container *ngIf="item.id">
+      <input mdInput placeholder="ID" disabled name="id" [(ngModel)]="item.id">
+    </md-input-container>
+
+    <md-input-container>
+      <input mdInput placeholder="Description" name="description" [(ngModel)]="item.description">
+    </md-input-container>
+
+    <md-select placeholder="Tag Primary" name="tag_primary" [(ngModel)]="item.tag_primary">
+      <md-option *ngFor="let tag of tags" [value]="tag.name">
+        {{tag.name}}
+      </md-option>
+    </md-select>
+
+    <md-input-container>
+      <input mdInput placeholder="Tag Secondary" name="tag_secondary" [(ngModel)]="item.tag_secondary">
+    </md-input-container>
+
+    <ace-editor class="ace-editor" [(text)]="item.content" #editor></ace-editor>
+  </div>
+</form>

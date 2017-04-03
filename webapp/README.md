@@ -1,29 +1,27 @@
-# codebriefcase
+# CodeBriefcase
 
-This project was generated with the [Angular Full-Stack Generator](https://github.com/DaftMonk/generator-angular-fullstack) version 3.3.0.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.0.0-rc.1.
 
-## Getting Started
+## Development server
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
-### Prerequisites
+## Code scaffolding
 
-- [Git](https://git-scm.com/)
-- [Node.js and npm](nodejs.org) Node ^4.2.3, npm ^2.14.7
-- [Bower](bower.io) (`npm install --global bower`)
-- [Ruby](https://www.ruby-lang.org) and then `gem install sass`
-- [Grunt](http://gruntjs.com/) (`npm install --global grunt-cli`)
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive/pipe/service/class/module`.
 
-### Developing
+## Build
 
-1. Run `npm install` to install server dependencies.
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
 
-2. Run `bower install` to install front-end dependencies.
+## Running unit tests
 
-3. Run `grunt serve` to start the development server. It should automatically open the client in your browser when ready.
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Build & development
+## Running end-to-end tests
 
-Run `grunt build` for building and `grunt serve` for preview.
+Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Before running the tests make sure you are serving the app via `ng serve`.
 
-## Testing
+## Further help
 
-Running `npm test` will run the unit tests with karma.
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).

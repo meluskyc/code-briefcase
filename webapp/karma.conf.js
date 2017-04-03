@@ -1,98 +1,44 @@
-// Karma configuration
-// http://karma-runner.github.io/0.10/config/configuration-file.html
+// Karma configuration file, see link for more information
+// https://karma-runner.github.io/0.13/config/configuration-file.html
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
-    // base path, that will be used to resolve files and exclude
     basePath: '',
-
-    // testing framework to use (jasmine/mocha/qunit/...)
-    frameworks: ['jasmine'],
-
-    // list of files / patterns to load in the browser
-    files: [
-      // bower:js
-      'client/bower_components/angular/angular.js',
-      'client/bower_components/angular-resource/angular-resource.js',
-      'client/bower_components/angular-cookies/angular-cookies.js',
-      'client/bower_components/angular-sanitize/angular-sanitize.js',
-      'client/bower_components/lodash/dist/lodash.compat.js',
-      'client/bower_components/angular-ui-router/release/angular-ui-router.js',
-      'client/bower_components/angular-animate/angular-animate.js',
-      'client/bower_components/angular-aria/angular-aria.js',
-      'client/bower_components/angular-messages/angular-messages.js',
-      'client/bower_components/angular-material/angular-material.js',
-      'client/bower_components/ace-builds/src-min-noconflict/ace.js',
-      'client/bower_components/ace-builds/src-min-noconflict/ext-language_tools.js',
-      'client/bower_components/angular-ui-ace/ui-ace.js',
-      'client/bower_components/moment/moment.js',
-      'client/bower_components/requirejs/require.js',
-      'client/bower_components/angular-mocks/angular-mocks.js',
-      // endbower
-      'client/app/app.js',
-      'client/{app,components}/**/*.module.js',
-      'client/{app,components}/**/*.js',
-      'client/{app,components}/**/*.html'
+    frameworks: ['jasmine', '@angular/cli'],
+    plugins: [
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage-istanbul-reporter'),
+      require('@angular/cli/plugins/karma')
     ],
-
+    client:{
+      clearContext: false // leave Jasmine Spec Runner output visible in browser
+    },
+    files: [
+      { pattern: './src/test.ts', watched: false }
+    ],
     preprocessors: {
-      '**/*.html': 'ng-html2js',
-      'client/{app,components}/**/*.js': 'babel'
+      './src/test.ts': ['@angular/cli']
     },
-
-    ngHtml2JsPreprocessor: {
-      stripPrefix: 'client/'
+    mime: {
+      'text/x-typescript': ['ts','tsx']
     },
-
-    babelPreprocessor: {
-      options: {
-        sourceMap: 'inline',
-        optional: [
-          'es7.classProperties'
-        ]
-      },
-      filename: function (file) {
-        return file.originalPath.replace(/\.js$/, '.es5.js');
-      },
-      sourceFileName: function (file) {
-        return file.originalPath;
-      }
+    coverageIstanbulReporter: {
+      reports: [ 'html', 'lcovonly' ],
+      fixWebpackSourcePaths: true
     },
-
-    // list of files / patterns to exclude
-    exclude: [],
-
-    // web server port
-    port: 8080,
-
-    // level of logging
-    // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
+    angularCli: {
+      environment: 'dev'
+    },
+    reporters: config.angularCli && config.angularCli.codeCoverage
+              ? ['progress', 'coverage-istanbul']
+              : ['progress', 'kjhtml'],
+    port: 9876,
+    colors: true,
     logLevel: config.LOG_INFO,
-
-    // reporter types:
-    // - dots
-    // - progress (default)
-    // - spec (karma-spec-reporter)
-    // - junit
-    // - growl
-    // - coverage
-    reporters: ['spec'],
-
-    // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
-
-    // Start these browsers, currently available:
-    // - Chrome
-    // - ChromeCanary
-    // - Firefox
-    // - Opera
-    // - Safari (only Mac)
-    // - PhantomJS
-    // - IE (only Windows)
-    browsers: ['PhantomJS'],
-
-    // Continuous Integration mode
-    // if true, it capture browsers, run tests and exit
+    autoWatch: true,
+    browsers: ['Chrome'],
     singleRun: false
   });
 };
